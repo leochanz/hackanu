@@ -175,7 +175,7 @@ function App() {
   // }, [responseData]);
 
   return (
-    <div className="">
+    <div className="pb-8">
       <div className="navbar bg-blue-950 text-white">
         <div className="flex-1">
           <a className="btn btn-ghost text-xl">DISLEXICLEAR</a>
