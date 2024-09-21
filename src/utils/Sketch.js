@@ -6,9 +6,12 @@ export const sketch = (data, img, width) => (p) => {
   let chosenCentre = [0, 0];
   let imageToAnnotate, dyslexiaFont;
   let SCALEFACTOR ;
+  let minSize;
+  const zoomLevel = 3
+
   p.preload = () => {
     imageToAnnotate = p.loadImage(img);
-      dyslexiaFont = p.loadFont(OpenDyslexic3);
+    dyslexiaFont = p.loadFont(OpenDyslexic3);
   };
 
   p.setup = () => {
@@ -17,6 +20,7 @@ export const sketch = (data, img, width) => (p) => {
       imageToAnnotate.width * SCALEFACTOR,
       imageToAnnotate.height * SCALEFACTOR
     );
+    minSize = Math.max(imageToAnnotate.width, imageToAnnotate.height) * 0.05
     p.createCanvas(imageToAnnotate.width, imageToAnnotate.height);
     chosenCentre = [imageToAnnotate.width / 2, imageToAnnotate.height / 2];
     console.log(chosenCentre)
@@ -40,7 +44,7 @@ export const sketch = (data, img, width) => (p) => {
       buffer.pop();
     }
 
-    buffer.filter(p.BLUR, 10);
+    //buffer.filter(p.BLUR, 10);
 
     buffer.fill("#00008B");
     for (let line of parsedLines) {
@@ -67,12 +71,14 @@ export const sketch = (data, img, width) => (p) => {
   p.mouseClicked = () => {
     if (buffer && chosenCentre){
       if (zoom === 1) {
-        zoom = 3;
+        let boundMouseX = Math.max(buffer.width/(2*zoomLevel), Math.min(p.mouseX, buffer.width - (buffer.width/(2*zoomLevel))));
+        let boundMouseY = Math.max(buffer.height/(2*zoomLevel), Math.min(p.mouseY, buffer.height - (buffer.height/(2*zoomLevel))));
+        zoom = zoomLevel;
         let cx = chosenCentre[0];
         let cy = chosenCentre[1];
         chosenCentre = [
-          (zoom + 1) * cx - zoom * p.mouseX,
-          (zoom + 1) * cy - zoom * p.mouseY,
+          (zoom + 1) * cx - zoom * boundMouseX,
+          (zoom + 1) * cy - zoom * boundMouseY,
         ];
       } else {
         zoom = 1;
@@ -152,8 +158,8 @@ export const sketch = (data, img, width) => (p) => {
       processed.push({
         bbx: boxLeft*SCALEFACTOR,
         bby: boxTop*SCALEFACTOR,
-        width: boxWidth*SCALEFACTOR,
-        height: boxHeight*SCALEFACTOR,
+        width: Math.max(boxWidth*SCALEFACTOR, minSize),
+        height: Math.max(boxHeight*SCALEFACTOR, minSize),
         text: box["text"],
       });
     }
