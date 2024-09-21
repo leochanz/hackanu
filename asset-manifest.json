@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/hackanu/static/css/main.b7467c21.css",
-    "main.js": "/hackanu/static/js/main.8ff0447f.js",
+    "main.js": "/hackanu/static/js/main.d8b708c6.js",
     "static/js/453.a6a97343.chunk.js": "/hackanu/static/js/453.a6a97343.chunk.js",
     "static/media/OpenDyslexic-Regular.otf": "/hackanu/static/media/OpenDyslexic-Regular.1455ef8fec0fedff22cc.otf",
     "index.html": "/hackanu/index.html",
     "main.b7467c21.css.map": "/hackanu/static/css/main.b7467c21.css.map",
-    "main.8ff0447f.js.map": "/hackanu/static/js/main.8ff0447f.js.map",
+    "main.d8b708c6.js.map": "/hackanu/static/js/main.d8b708c6.js.map",
     "453.a6a97343.chunk.js.map": "/hackanu/static/js/453.a6a97343.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b7467c21.css",
-    "static/js/main.8ff0447f.js"
+    "static/js/main.d8b708c6.js"
   ]
 }
