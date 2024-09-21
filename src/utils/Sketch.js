@@ -1,12 +1,15 @@
 import OpenDyslexic3 from "./OpenDyslexic-Regular.otf";
 
-export const sketch = (data, img, width) => (p) => {
-  let buffer;
+export const sketch = (datavals, imgval, width) => (p) => {
+  let buffer, blurBuffer;
+  let img = imgval;
+  let data = datavals;
   let zoom = 1;
   let chosenCentre = [0, 0];
   let imageToAnnotate, dyslexiaFont;
   let SCALEFACTOR;
   const zoomLevel = 3
+  const fontXScale = 1.2
 
   p.preload = () => {
     imageToAnnotate = p.loadImage(img);
@@ -14,7 +17,8 @@ export const sketch = (data, img, width) => (p) => {
   };
 
   p.setup = () => {
-	SCALEFACTOR = width/imageToAnnotate.width;
+    if (data) {
+	  SCALEFACTOR = width/imageToAnnotate.width;
     imageToAnnotate.resize(
       imageToAnnotate.width * SCALEFACTOR,
       imageToAnnotate.height * SCALEFACTOR
@@ -22,25 +26,36 @@ export const sketch = (data, img, width) => (p) => {
     p.createCanvas(imageToAnnotate.width, imageToAnnotate.height);
     chosenCentre = [imageToAnnotate.width / 2, imageToAnnotate.height / 2];
     buffer = p.createGraphics(imageToAnnotate.width, imageToAnnotate.height);
-    buffer.noStroke();
+    blurBuffer = p.createGraphics(imageToAnnotate.width, imageToAnnotate.height);
+    blurBuffer.noStroke();
+    buffer.noStroke()
     buffer.image(imageToAnnotate, 0, 0);
     buffer.textFont(dyslexiaFont);
+    blurBuffer.textFont(dyslexiaFont);
     buffer.textAlign(p.CENTER, p.CENTER);
+    blurBuffer.textAlign(p.CENTER, p.CENTER);
     p.imageMode(p.CENTER);
+    blurBuffer.imageMode(p.CENTER)
     buffer.rectMode(p.CENTER);
+    blurBuffer.rectMode(p.CENTER);
 
     let parsedLines = parseLines(data);
 
-    buffer.fill("#FFFDD0");
+    blurBuffer.fill("#FFFDD0");
     for (let line of parsedLines) {
-      buffer.push();
-      let textPos = boxCentre(line);
-      buffer.rect(textPos.x, textPos.y, line["width"]*1.1, line["height"]*1.1, line['height']/10);
-      buffer.pop();
+      blurBuffer.push();
+      blurBuffer.textSize(
+        findBestFontSize(line["text"], line["width"], line["height"])
+      );
+      let big = boundsFromText(line)
+      blurBuffer.rect(big["cx"], big["cy"], big["width"], big["height"], big['height']/10);
+      blurBuffer.pop();
     }
 
-    //buffer.background(255, 253, 208, 255)
-    //buffer.filter(p.BLUR, 5);
+    //buffer.background(255, 253, 208, 180)
+    blurBuffer.filter(p.BLUR, 5);
+
+    buffer.image(blurBuffer, 0, 0)
 
     buffer.fill("#00008B");
     for (let line of parsedLines) {
@@ -49,23 +64,26 @@ export const sketch = (data, img, width) => (p) => {
       buffer.textSize(
         findBestFontSize(line["text"], line["width"], line["height"])
       );
-      buffer.text(line["text"], textPos.x, textPos.y);
+      buffer.text(line["text"]+" ", textPos.x, textPos.y);
       buffer.pop();
+      }
     }
   };
 
   p.draw = () => {
-    p.image(
-      buffer,
-      chosenCentre[0],
-      chosenCentre[1],
-      buffer.width * zoom,
-      buffer.height * zoom
+    if (data) {
+      p.image(
+        buffer,
+        chosenCentre[0],
+        chosenCentre[1],
+        buffer.width * zoom,
+        buffer.height * zoom
     );
+    }
   };
 
   p.mouseClicked = () => {
-    if (buffer && chosenCentre){
+    if (buffer && chosenCentre && data){
       if (zoom === 1) {
         let boundMouseX = Math.max(buffer.width/(2*zoomLevel), Math.min(p.mouseX, buffer.width - (buffer.width/(2*zoomLevel))));
         let boundMouseY = Math.max(buffer.height/(2*zoomLevel), Math.min(p.mouseY, buffer.height - (buffer.height/(2*zoomLevel))));
@@ -161,8 +179,6 @@ export const sketch = (data, img, width) => (p) => {
     }
     return processed;
   }
-};
-
 
 function combLines(lines){
   let combined = []
@@ -187,6 +203,44 @@ function combLines(lines){
     console.log(i.text)
   }
   return combined
+}
+
+function expandRect(rect, n) {
+  // Calculate the expansion factor
+  let factor = 1 + n / 100;
+  
+  // Calculate the amount to expand width and height
+  let newWidth = rect.width * factor;
+  let newHeight = rect.height * factor;
+  
+  // Adjust bbx and bby (top-left corner) to center the expansion
+  let bbxAdjustment = (newWidth - rect.width) / 2;
+  let bbyAdjustment = (newHeight - rect.height) / 2;
+  
+  return {
+    bbx: rect.bbx - bbxAdjustment,
+    bby: rect.bby - bbyAdjustment,
+    width: newWidth,
+    height: newHeight
+  };
+}
+
+
+function boundsFromText(box){
+  let c = boxCentre(box)
+  let cx = c["x"]
+  let cy = c["y"]
+  let w = Math.max(box["width"], blurBuffer.textWidth(box["text"])*fontXScale)
+  let h = Math.max(box["height"], blurBuffer.textAscent() + blurBuffer.textDescent())
+
+  let bx = cx - w/2
+  let by = cy - h/2
+
+  return {bbx: bx, bby: by, width: w, height: h, text: box["text"], cx: cx, cy: cy}
+
+}
+
+
 }
 
 /*
