@@ -170,7 +170,7 @@ function combLines(lines){
       let previousBlock = combined[combined.length - 1]
       let currentMid = line['bby'] + line['height']/2
       let midLine = previousBlock['bby'] + previousBlock['height']/2
-      if (Math.abs(currentMid - midLine) < previousBlock['height']/2) {
+      if (Math.abs(currentMid - midLine) < previousBlock['height']/2 && previousBlock['bbx'] < line['bbx']) {
         previousBlock['text'] += ' ' + line['text']
         previousBlock['height'] = Math.max(previousBlock['bby'] + previousBlock['height'], line['bby'] + line['height']) - Math.min(previousBlock['bby'], line['bby'])
         previousBlock['bby'] = Math.min(previousBlock['bby'], line['bby'])
@@ -182,6 +182,8 @@ function combLines(lines){
       combined.push(line)
     }
   }
-
+  for (let i of combined){
+    console.log(i.text)
+  }
   return combined
 }
