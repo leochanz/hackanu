@@ -7,8 +7,10 @@ import p5 from "p5";
 
 import { Camera } from "react-camera-pro";
 import { FaCamera } from "react-icons/fa";
+import { FaRegCircle } from "react-icons/fa";
+import { GiCircle } from "react-icons/gi";
 
-import { sketch } from "./utils/Image.js";
+import { sketch } from "./utils/Sketch.js";
 
 function App() {
   const [text, setText] = useState("");
@@ -24,7 +26,10 @@ function App() {
     const sketchRef = useRef();
 
     useEffect(() => {
-      const p5Instance = new p5(sketch(responseData, image, width), sketchRef.current);
+      const p5Instance = new p5(
+        sketch(responseData, image, width),
+        sketchRef.current
+      );
 
       return () => {
         p5Instance.remove();
@@ -206,15 +211,19 @@ function App() {
         <div className="container w-full flex flex-col gap-y-4">
           {cameraEnabled && (
             <div className="w-full flex justify-center">
-              <div className="w-full flex flex-col items-center gap-y-2 max-w-4xl">
+              <div className="w-full flex flex-col items-center max-w-4xl relative">
                 <Camera
                   ref={camera}
                   facingMode="environment"
                   aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
                 />
-                <button onClick={capture} className="btn btn-circle">
-                  <FaCamera />
-                </button>
+                  <button
+                    onClick={capture}
+                    className="btn btn-circle btn-lg border-none bg-white absolute right-1 inset-y-1/2"
+                  >
+                    {/* <FaCamera /> */}
+                    <GiCircle className="size-full text-black" />
+                  </button>
               </div>
             </div>
           )}
