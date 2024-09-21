@@ -204,7 +204,7 @@ function App() {
               step != 1 && "hidden"
             }`}
           >
-            <div className="w-full sm:w-3/4 flex flex-col items-center max-w-[768px] relative">
+            <div onClick={capture} className="w-full sm:w-3/4 flex flex-col items-center max-w-[768px] relative">
               <Camera
                 ref={camera}
                 facingMode="environment"
@@ -263,7 +263,9 @@ function App() {
                 {loading && (
                   <span class="loading loading-dots loading-xs"></span>
                 )}
-                {responseData == "No text detected" && <div>No text detected</div>}
+                {responseData == "No text detected" && (
+                  <div>No text detected</div>
+                )}
               </div>
             </div>
           </div>
