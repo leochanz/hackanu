@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import { createWorker } from "tesseract.js";
 import $ from "jquery";
@@ -12,17 +11,12 @@ import { FaCamera } from "react-icons/fa";
 import { sketch } from "./utils/Image.js";
 
 function App() {
-  var fxCanvas = fx.canvas();
-  var texture = null;
-
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
-  const [width, setWidth] = useState(window.innerWidth);
-
-  
+  const [width, setWidth] = useState(window.innerWidth * 0.75);
 
   const camera = useRef(null);
 
@@ -43,48 +37,46 @@ function App() {
   const capture = () => {
     const imagePreview = document.getElementById("imagePreview");
     const imageSrc = camera.current.takePhoto();
-    setCameraEnabled(false);
     setImage(imageSrc);
+    setCameraEnabled(false);
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
     console.log("Here");
     // preprocess();
   };
 
-  const preprocess = async () => {
-    const canvas = document.getElementById("canvas");
-    const imagePreview = document.getElementById("imagePreview");
-    const processedImage = document.getElementById("processedImage");
+  // const preprocess = async () => {
+  //   const canvas = document.getElementById("canvas");
+  //   const imagePreview = document.getElementById("imagePreview");
+  //   const processedImage = document.getElementById("processedImage");
 
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
+  //   const ctx = canvas.getContext("2d");
+  //   const img = new Image();
 
-    img.onload = function () {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+  //   img.onload = function () {
+  //     canvas.width = img.width;
+  //     canvas.height = img.height;
+  //     ctx.drawImage(img, 0, 0);
 
-      // Use fxCanvas to process the image
-      texture = fxCanvas.texture(canvas);
-      fxCanvas
-        .draw(texture)
-        .hueSaturation(-1, -1) // Grayscale
-        .unsharpMask(20, 2)
-        .brightnessContrast(0.2, 0.9) // Adjust brightness and contrast
-        .update();
+  //     // Use fxCanvas to process the image
+  //     texture = fxCanvas.texture(canvas);
+  //     fxCanvas
+  //       .draw(texture)
+  //       .hueSaturation(-1, -1) // Grayscale
+  //       .unsharpMask(20, 2)
+  //       .brightnessContrast(0.2, 0.9) // Adjust brightness and contrast
+  //       .update();
 
-      // Draw the processed image onto the canvas
-      ctx.drawImage(fxCanvas, 0, 0);
+  //     // Draw the processed image onto the canvas
+  //     ctx.drawImage(fxCanvas, 0, 0);
 
-      // Convert canvas to data URL and set it as the source of processedImage
-      processedImage.src = canvas.toDataURL();
-      processedImage.style.display = "block";
-    };
+  //     // Convert canvas to data URL and set it as the source of processedImage
+  //     processedImage.src = canvas.toDataURL();
+  //     processedImage.style.display = "block";
+  //   };
 
-    img.src = imagePreview.src;
-  };
-
-  const [data, setData] = useState(null);
+  //   img.src = imagePreview.src;
+  // };
 
   useEffect(() => {
     const fileInput = document.getElementById("fileInput");
@@ -136,12 +128,8 @@ function App() {
         }
         const data = await response.json();
         console.log(data);
-        // setData(data);
         setResponseData(data);
-        const descriptions = data.detections
-          .map((detection) => detection.description)
-          .join(", ");
-        setText(descriptions);
+        setText(data.detections[0].description);
       } catch (error) {
         console.error("Failed to fetch:", error);
         setText("Failed to fetch data");
@@ -157,8 +145,8 @@ function App() {
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.style.display = "block";
         setImage(imagePreview.src);
+        setCameraEnabled(false);
         console.log("Here");
-        // preprocess();
       }
     });
 
@@ -282,7 +270,7 @@ function App() {
             {text}
           </div>
           {responseData && (
-            <div className="max-w-2xl">
+            <div className="w-full flex justify-center">
               <P5Wrapper />
             </div>
           )}
