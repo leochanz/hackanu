@@ -9,12 +9,16 @@ import { GiCircle } from "react-icons/gi";
 import { sketch } from "./utils/Sketch.js";
 
 function App() {
-  const [text, setText] = useState("");
+  const skipConfirmation = true;
+
   const [loading, setLoading] = useState(false);
-  const [cameraEnabled, setCameraEnabled] = useState(true);
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
-  const [width, setWidth] = useState(window.innerWidth * 0.75);
+  let sketchWidth = window.innerWidth * 0.75;
+  if (sketchWidth > 768) sketchWidth = 768;
+  if (sketchWidth < 344) sketchWidth = 344;
+  const [width, setWidth] = useState(sketchWidth);
+  const [step, setStep] = useState(1);
 
   const camera = useRef(null);
 
@@ -22,27 +26,95 @@ function App() {
     const sketchRef = useRef();
 
     useEffect(() => {
-      const p5Instance = new p5(
-        sketch(responseData, image, width),
-        sketchRef.current
-      );
-      return () => {
-        p5Instance.remove();
-      };
+      console.log("responseData:", responseData);
+      if (responseData != "No text detected") {
+        const p5Instance = new p5(
+          sketch(responseData, image, width),
+          sketchRef.current
+        );
+        setStep(3);
+        return () => {
+          p5Instance.remove();
+        };
+      }
     }, []);
 
     return <div ref={sketchRef}></div>;
   };
 
-  const capture = () => {
+  const capture = async () => {
     const imagePreview = document.getElementById("imagePreview");
     const imageSrc = camera.current.takePhoto();
     setImage(imageSrc);
-    setCameraEnabled(false);
     imagePreview.src = imageSrc;
-    imagePreview.style.display = "block";
-    console.log("Here");
-    // preprocess();
+
+    if (skipConfirmation) {
+      await recognizeText();
+      if (responseData != "No text detected") setStep(3);
+    } else {
+      setStep(2);
+    }
+  };
+
+  const getBase64FromBlobUrl = async (blobUrl) => {
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result.split(",")[1]); // Extract base64 part
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const getBase64Image = async (imageSrc) => {
+    if (imageSrc.startsWith("data:image")) {
+      return imageSrc.replace("data:", "").replace(/^.+,/, "");
+    } else if (imageSrc.startsWith("blob:")) {
+      return await getBase64FromBlobUrl(imageSrc);
+    }
+    throw new Error("Unsupported image source format");
+  };
+
+  const recognizeText = async () => {
+    const imagePreview = document.getElementById("imagePreview");
+
+    const base64Image = await getBase64Image(imagePreview.src);
+    // const worker = await createWorker();
+    console.time("Start");
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "https://australia-southeast1-oeege-436306.cloudfunctions.net/analyze-image",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ image: base64Image }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data);
+
+      if (data.detections == "No text detected") {
+        setResponseData("No text detected");
+      } else {
+        setResponseData(data);
+        console.log(data.detections[0].description);
+      }
+    } catch (error) {
+      console.error("Failed to fetch:", error);
+      console.log("Failed to fetch data");
+    } finally {
+      setLoading(false);
+      console.timeEnd("Start");
+    }
   };
 
   // const preprocess = async () => {
@@ -85,73 +157,20 @@ function App() {
 
     const button = document.getElementById("button");
 
-    const getBase64FromBlobUrl = async (blobUrl) => {
-      const response = await fetch(blobUrl);
-      const blob = await response.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve(reader.result.split(",")[1]); // Extract base64 part
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    };
-
-    const getBase64Image = async (imageSrc) => {
-      if (imageSrc.startsWith("data:image")) {
-        return imageSrc.replace("data:", "").replace(/^.+,/, "");
-      } else if (imageSrc.startsWith("blob:")) {
-        return await getBase64FromBlobUrl(imageSrc);
-      }
-      throw new Error("Unsupported image source format");
-    };
-
-    const recognizeText = async () => {
-      const base64Image = await getBase64Image(imagePreview.src);
-      // const worker = await createWorker();
-      console.time("Start");
-      setLoading(true);
-      try {
-        const response = await fetch(
-          "https://australia-southeast1-oeege-436306.cloudfunctions.net/analyze-image",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ image: base64Image }),
-          }
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log(data);
-        setResponseData(data);
-        setText(data.detections[0].description);
-      } catch (error) {
-        console.error("Failed to fetch:", error);
-        setText("Failed to fetch data");
-      } finally {
-        setLoading(false);
-        console.timeEnd("Start");
-      }
-    };
-
     fileInput.addEventListener("change", function (event) {
       const file = event.target.files[0];
       if (file) {
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.style.display = "block";
         setImage(imagePreview.src);
-        setCameraEnabled(false);
+        setStep(2);
         console.log("Here");
         event.target.value = null;
       }
     });
 
     button.addEventListener("click", () => {
+      setStep(3);
       recognizeText();
       imagePreview.style.display = "block";
     });
@@ -160,10 +179,6 @@ function App() {
       fileInput.removeEventListener("change", () => {});
     };
   }, []);
-
-  useEffect(() => {
-    setResponseData(null);
-  }, [cameraEnabled]);
 
   // const p5WrapperRef = useRef(null);
   // useEffect(() => {
@@ -188,14 +203,14 @@ function App() {
           <div
             id="step1"
             className={`fixed sm:relative w-full flex flex-col items-center gap-y-4 ${
-              !cameraEnabled && "hidden"
+              step != 1 && "hidden"
             }`}
           >
-            <div className="w-full flex flex-col items-center max-w-4xl relative">
+            <div className="w-full sm:w-3/4 flex flex-col items-center max-w-[768px] relative">
               <Camera
                 ref={camera}
                 facingMode="environment"
-                aspectRatio={window.innerWidth > 640 ? 16 / 9 : phoneRatio}
+                aspectRatio={window.innerWidth > 768 ? 16 / 9 : phoneRatio}
               />
               <div className="absolute bottom-0 w-full flex justify-center">
                 <button
@@ -218,36 +233,70 @@ function App() {
           </div>
           <div
             id="step2"
-            className={`container pt-4 w-full flex flex-col items-center gap-y-4 ${
-              cameraEnabled && "hidden"
+            className={`pt-4 w-full flex flex-col items-center gap-y-4 ${
+              step != 2 && "hidden"
             }`}
           >
             <img
               id="imagePreview"
               alt="Selected Image"
-              className="w-3/4 max-w-2xl hidden"
+              className="w-3/4 min-w-[344px] max-w-[768px]"
             />
-            <div className="flex gap-x-4">
+            <div className="w-full flex flex-col items-center px-4">
+              <div className="flex gap-x-4 mb-4">
+                <button
+                  className="btn w-48"
+                  onClick={() => {
+                    setStep(1);
+                    setResponseData(null);
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
+                  }}
+                >
+                  Take Another Picture
+                </button>
+                <button id="button" className="btn w-48">
+                  Recognize Text
+                </button>
+              </div>
+              <div className="w-full max-w-[768px] p-4 bg-white text-xs border">
+                {loading && (
+                  <span class="loading loading-dots loading-xs"></span>
+                )}
+                {responseData == "No text detected" && <div>No text detected</div>}
+              </div>
+            </div>
+          </div>
+          <div
+            id="step3"
+            className={`container pt-4 w-full flex flex-col items-center ${
+              step != 3 && "hidden"
+            }`}
+          >
+            <div className="w-full flex justify-center mb-4">
+              {responseData && responseData == "No text detected" && (
+                <div>No text detected</div>
+              )}
+              {responseData && responseData != "No text detected" && (
+                <P5Wrapper />
+              )}
+            </div>
+            <div>
               <button
-                className="btn w-48"
-                onClick={() => setCameraEnabled(true)}
+                className="btn w-48 mb-8"
+                onClick={() => {
+                  setStep(1);
+                  setResponseData(null);
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
               >
                 Take Another Picture
               </button>
-              <button id="button" className="btn w-48">
-                Recognize Text
-              </button>
-            </div>
-            <div className="w-full max-w-2xl p-4 bg-white text-xs border">
-              {loading && (
-                <Spinner animation="border" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-              )}
-              {!loading && <div>{text}</div>}
-            </div>
-            <div className="w-full flex justify-center mb-8">
-              {responseData && <P5Wrapper />}
             </div>
           </div>
         </div>
