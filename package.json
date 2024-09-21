@@ -10,6 +10,7 @@
     "jcrop": "^0.0.1",
     "jquery": "^3.7.1",
     "jquery-jcrop": "^0.9.15",
+    "p5": "^1.10.0",
     "react": "^18.3.1",
     "react-camera-pro": "^1.4.0",
     "react-dom": "^18.3.1",

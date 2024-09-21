@@ -4,9 +4,12 @@ import "./App.css";
 import { createWorker } from "tesseract.js";
 import $ from "jquery";
 import fx from "glfx";
+import p5 from "p5";
 
 import { Camera } from "react-camera-pro";
 import { FaCamera } from "react-icons/fa";
+
+import { sketch } from "./utils/Image.js";
 
 function App() {
   var fxCanvas = fx.canvas();
@@ -15,13 +18,33 @@ function App() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [cameraEnabled, setCameraEnabled] = useState(true);
+  const [image, setImage] = useState(null);
+  const [responseData, setResponseData] = useState(null);
+  const [width, setWidth] = useState(window.innerWidth);
+
+  
 
   const camera = useRef(null);
+
+  const P5Wrapper = () => {
+    const sketchRef = useRef();
+
+    useEffect(() => {
+      const p5Instance = new p5(sketch(responseData, image, width), sketchRef.current);
+
+      return () => {
+        p5Instance.remove();
+      };
+    }, []);
+
+    return <div ref={sketchRef}></div>;
+  };
 
   const capture = () => {
     const imagePreview = document.getElementById("imagePreview");
     const imageSrc = camera.current.takePhoto();
     setCameraEnabled(false);
+    setImage(imageSrc);
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
     console.log("Here");
@@ -69,27 +92,27 @@ function App() {
     // const processedImage = document.getElementById("processedImage");
 
     const button = document.getElementById("button");
-    
+
     const getBase64FromBlobUrl = async (blobUrl) => {
       const response = await fetch(blobUrl);
       const blob = await response.blob();
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          resolve(reader.result.split(',')[1]); // Extract base64 part
+          resolve(reader.result.split(",")[1]); // Extract base64 part
         };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
     };
-  
+
     const getBase64Image = async (imageSrc) => {
-      if (imageSrc.startsWith('data:image')) {
-        return imageSrc.replace('data:', '').replace(/^.+,/, '');
-      } else if (imageSrc.startsWith('blob:')) {
+      if (imageSrc.startsWith("data:image")) {
+        return imageSrc.replace("data:", "").replace(/^.+,/, "");
+      } else if (imageSrc.startsWith("blob:")) {
         return await getBase64FromBlobUrl(imageSrc);
       }
-      throw new Error('Unsupported image source format');
+      throw new Error("Unsupported image source format");
     };
 
     const recognizeText = async () => {
@@ -113,8 +136,11 @@ function App() {
         }
         const data = await response.json();
         console.log(data);
-        setData(data);
-        const descriptions = data.detections.map(detection => detection.description).join(', ');
+        // setData(data);
+        setResponseData(data);
+        const descriptions = data.detections
+          .map((detection) => detection.description)
+          .join(", ");
         setText(descriptions);
       } catch (error) {
         console.error("Failed to fetch:", error);
@@ -130,6 +156,7 @@ function App() {
       if (file) {
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.style.display = "block";
+        setImage(imagePreview.src);
         console.log("Here");
         // preprocess();
       }
@@ -254,6 +281,11 @@ function App() {
             {loading && <div>Loading...</div>}
             {text}
           </div>
+          {responseData && (
+            <div className="max-w-2xl">
+              <P5Wrapper />
+            </div>
+          )}
         </div>
       </div>
     </div>
