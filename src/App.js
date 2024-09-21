@@ -15,7 +15,7 @@ function App() {
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
   let sketchWidth = window.innerWidth * 0.75;
-  if (sketchWidth > 640) sketchWidth = 640;
+  if (sketchWidth > 768) sketchWidth = 768;
   if (sketchWidth < 344) sketchWidth = 344;
   const [width, setWidth] = useState(sketchWidth);
   const [step, setStep] = useState(1);
@@ -201,11 +201,11 @@ function App() {
               step != 1 && "hidden"
             }`}
           >
-            <div className="w-full sm:w-3/4 flex flex-col items-center max-w-[640px] relative">
+            <div className="w-full sm:w-3/4 flex flex-col items-center max-w-[768px] relative">
               <Camera
                 ref={camera}
                 facingMode="environment"
-                aspectRatio={window.innerWidth > 640 ? 16 / 9 : phoneRatio}
+                aspectRatio={window.innerWidth > 768 ? 16 / 9 : phoneRatio}
               />
               <div className="absolute bottom-0 w-full flex justify-center">
                 <button
@@ -235,7 +235,7 @@ function App() {
             <img
               id="imagePreview"
               alt="Selected Image"
-              className="w-3/4 min-w-[344px] max-w-[640px] hidden"
+              className="w-3/4 min-w-[344px] max-w-[768px] hidden"
             />
             <div className="flex gap-x-4">
               <button
