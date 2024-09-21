@@ -27,7 +27,7 @@ function App() {
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
     console.log("Here");
-    preprocess();
+    // preprocess();
   };
 
   const preprocess = async () => {
@@ -74,7 +74,7 @@ function App() {
       const worker = await createWorker();
       console.time("Start");
       setLoading(true);
-      const ret = await worker.recognize(processedImage.src);
+      const ret = await worker.recognize(imagePreview.src);
       setLoading(false);
       // const ret = await worker.recognize(imagePreview.src);
       console.timeEnd("Start");
