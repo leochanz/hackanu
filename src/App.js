@@ -156,25 +156,18 @@ function App() {
       imagePreview.style.display = "block";
     });
 
-    // $("#brightness, #contrast").on("change", function () {
-    //   var brightness = $("#brightness").val() / 100;
-    //   var contrast = $("#contrast").val() / 100;
-
-    //   fxCanvas
-    //     .draw(texture)
-    //     .hueSaturation(-1, -1)
-    //     .unsharpMask(20, 2)
-    //     .brightnessContrast(brightness, contrast)
-    //     .update();
-
-    //   processedImage.src = fxCanvas.toDataURL();
-    // });
-
-    // Cleanup the event listener when the component unmounts
     return () => {
       fileInput.removeEventListener("change", () => {});
     };
-  }, []); // The empty array ensures this effect runs only once (after initial render)
+  }, []);
+
+  const p5WrapperRef = useRef(null);
+  useEffect(() => {
+    if (responseData) {
+      // Scroll to the P5Wrapper component
+      p5WrapperRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [responseData]);
 
   return (
     <div className="">
@@ -185,24 +178,29 @@ function App() {
       </div>
       <div className="sm:mt-8 w-full flex justify-center">
         <div className="container">
-          <div id="step1" className={`w-full flex flex-col items-center gap-y-4 ${!cameraEnabled && "hidden"}`}>
+          <div
+            id="step1"
+            className={`w-full flex flex-col items-center gap-y-4 ${
+              !cameraEnabled && "hidden"
+            }`}
+          >
             {cameraEnabled && (
-                <div className="w-full flex flex-col items-center max-w-4xl relative">
-                  <Camera
-                    ref={camera}
-                    facingMode="environment"
-                    aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
-                  />
-                  <div className="absolute bottom-0 w-full flex justify-center">
-                    <button
-                      onClick={capture}
-                      className="btn btn-circle btn-lg border-none bg-white mb-1"
-                    >
-                      {/* <FaCamera /> */}
-                      <GiCircle className="size-full text-black" />
-                    </button>
-                  </div>
+              <div className="w-full flex flex-col items-center max-w-4xl relative">
+                <Camera
+                  ref={camera}
+                  facingMode="environment"
+                  aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
+                />
+                <div className="absolute bottom-0 w-full flex justify-center">
+                  <button
+                    onClick={capture}
+                    className="btn btn-circle btn-lg border-none bg-white mb-1"
+                  >
+                    {/* <FaCamera /> */}
+                    <GiCircle className="size-full text-black" />
+                  </button>
                 </div>
+              </div>
             )}
             <div className="flex">
               <label className="label">Or Upload Image</label>
@@ -215,7 +213,12 @@ function App() {
             </div>
           </div>
 
-          <div id="step2" className={`w-full flex flex-col gap-y-4 ${cameraEnabled && "hidden"}`}>
+          <div
+            id="step2"
+            className={`w-full flex flex-col gap-y-4 ${
+              cameraEnabled && "hidden"
+            }`}
+          >
             <div className="flex gap-x-4">
               <img
                 id="imagePreview"
@@ -224,12 +227,12 @@ function App() {
               />
             </div>
             {!cameraEnabled && (
-                <button
-                  className="btn w-48"
-                  onClick={() => setCameraEnabled(true)}
-                >
-                  Take Another Picture
-                </button>
+              <button
+                className="btn w-48"
+                onClick={() => setCameraEnabled(true)}
+              >
+                Take Another Picture
+              </button>
             )}
             <button id="button" className="btn w-48">
               Recognize Text
@@ -242,11 +245,9 @@ function App() {
               )}
               {!loading && <div>{text}</div>}
             </div>
-            {responseData && (
-              <div className="w-full flex justify-center">
-                <P5Wrapper />
-              </div>
-            )}
+            <div ref={p5WrapperRef} className="w-full flex justify-center">
+              {responseData && <P5Wrapper />}
+            </div>
           </div>
         </div>
       </div>
