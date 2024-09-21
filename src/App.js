@@ -1,26 +1,48 @@
 import React, { useState, useEffect, useRef } from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import { createWorker } from "tesseract.js";
 import $ from "jquery";
 import fx from "glfx";
+import p5 from "p5";
 
 import { Camera } from "react-camera-pro";
 import { FaCamera } from "react-icons/fa";
+import { FaRegCircle } from "react-icons/fa";
+import { GiCircle } from "react-icons/gi";
+
+import { sketch } from "./utils/Sketch.js";
 
 function App() {
-  var fxCanvas = fx.canvas();
-  var texture = null;
-
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [cameraEnabled, setCameraEnabled] = useState(true);
+  const [image, setImage] = useState(null);
+  const [responseData, setResponseData] = useState(null);
+  const [width, setWidth] = useState(window.innerWidth * 0.75);
 
   const camera = useRef(null);
+
+  const P5Wrapper = () => {
+    const sketchRef = useRef();
+
+    useEffect(() => {
+      const p5Instance = new p5(
+        sketch(responseData, image, width),
+        sketchRef.current
+      );
+
+      return () => {
+        p5Instance.remove();
+      };
+    }, []);
+
+    return <div ref={sketchRef}></div>;
+  };
 
   const capture = () => {
     const imagePreview = document.getElementById("imagePreview");
     const imageSrc = camera.current.takePhoto();
+    setImage(imageSrc);
     setCameraEnabled(false);
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
@@ -28,40 +50,38 @@ function App() {
     // preprocess();
   };
 
-  const preprocess = async () => {
-    const canvas = document.getElementById("canvas");
-    const imagePreview = document.getElementById("imagePreview");
-    const processedImage = document.getElementById("processedImage");
+  // const preprocess = async () => {
+  //   const canvas = document.getElementById("canvas");
+  //   const imagePreview = document.getElementById("imagePreview");
+  //   const processedImage = document.getElementById("processedImage");
 
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
+  //   const ctx = canvas.getContext("2d");
+  //   const img = new Image();
 
-    img.onload = function () {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+  //   img.onload = function () {
+  //     canvas.width = img.width;
+  //     canvas.height = img.height;
+  //     ctx.drawImage(img, 0, 0);
 
-      // Use fxCanvas to process the image
-      texture = fxCanvas.texture(canvas);
-      fxCanvas
-        .draw(texture)
-        .hueSaturation(-1, -1) // Grayscale
-        .unsharpMask(20, 2)
-        .brightnessContrast(0.2, 0.9) // Adjust brightness and contrast
-        .update();
+  //     // Use fxCanvas to process the image
+  //     texture = fxCanvas.texture(canvas);
+  //     fxCanvas
+  //       .draw(texture)
+  //       .hueSaturation(-1, -1) // Grayscale
+  //       .unsharpMask(20, 2)
+  //       .brightnessContrast(0.2, 0.9) // Adjust brightness and contrast
+  //       .update();
 
-      // Draw the processed image onto the canvas
-      ctx.drawImage(fxCanvas, 0, 0);
+  //     // Draw the processed image onto the canvas
+  //     ctx.drawImage(fxCanvas, 0, 0);
 
-      // Convert canvas to data URL and set it as the source of processedImage
-      processedImage.src = canvas.toDataURL();
-      processedImage.style.display = "block";
-    };
+  //     // Convert canvas to data URL and set it as the source of processedImage
+  //     processedImage.src = canvas.toDataURL();
+  //     processedImage.style.display = "block";
+  //   };
 
-    img.src = imagePreview.src;
-  };
-
-  const [data, setData] = useState(null);
+  //   img.src = imagePreview.src;
+  // };
 
   useEffect(() => {
     const fileInput = document.getElementById("fileInput");
@@ -69,27 +89,27 @@ function App() {
     // const processedImage = document.getElementById("processedImage");
 
     const button = document.getElementById("button");
-    
+
     const getBase64FromBlobUrl = async (blobUrl) => {
       const response = await fetch(blobUrl);
       const blob = await response.blob();
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          resolve(reader.result.split(',')[1]); // Extract base64 part
+          resolve(reader.result.split(",")[1]); // Extract base64 part
         };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
     };
-  
+
     const getBase64Image = async (imageSrc) => {
-      if (imageSrc.startsWith('data:image')) {
-        return imageSrc.replace('data:', '').replace(/^.+,/, '');
-      } else if (imageSrc.startsWith('blob:')) {
+      if (imageSrc.startsWith("data:image")) {
+        return imageSrc.replace("data:", "").replace(/^.+,/, "");
+      } else if (imageSrc.startsWith("blob:")) {
         return await getBase64FromBlobUrl(imageSrc);
       }
-      throw new Error('Unsupported image source format');
+      throw new Error("Unsupported image source format");
     };
 
     const recognizeText = async () => {
@@ -113,9 +133,8 @@ function App() {
         }
         const data = await response.json();
         console.log(data);
-        setData(data);
-        const descriptions = data.detections.map(detection => detection.description).join(', ');
-        setText(descriptions);
+        setResponseData(data);
+        setText(data.detections[0].description);
       } catch (error) {
         console.error("Failed to fetch:", error);
         setText("Failed to fetch data");
@@ -130,8 +149,9 @@ function App() {
       if (file) {
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.style.display = "block";
+        setImage(imagePreview.src);
+        setCameraEnabled(false);
         console.log("Here");
-        // preprocess();
       }
     });
 
@@ -191,15 +211,19 @@ function App() {
         <div className="container w-full flex flex-col gap-y-4">
           {cameraEnabled && (
             <div className="w-full flex justify-center">
-              <div className="w-full flex flex-col items-center gap-y-2 max-w-4xl">
+              <div className="w-full flex flex-col items-center max-w-4xl relative">
                 <Camera
                   ref={camera}
                   facingMode="environment"
                   aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
                 />
-                <button onClick={capture} className="btn btn-circle">
-                  <FaCamera />
-                </button>
+                  <button
+                    onClick={capture}
+                    className="btn btn-circle btn-lg border-none bg-white absolute right-1 inset-y-1/2"
+                  >
+                    {/* <FaCamera /> */}
+                    <GiCircle className="size-full text-black" />
+                  </button>
               </div>
             </div>
           )}
@@ -254,6 +278,11 @@ function App() {
             {loading && <div>Loading...</div>}
             {text}
           </div>
+          {responseData && (
+            <div className="w-full flex justify-center">
+              <P5Wrapper />
+            </div>
+          )}
         </div>
       </div>
     </div>
