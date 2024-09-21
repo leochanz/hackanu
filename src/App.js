@@ -42,15 +42,78 @@ function App() {
     return <div ref={sketchRef}></div>;
   };
 
-  const capture = () => {
+  const capture = async () => {
     const imagePreview = document.getElementById("imagePreview");
     const imageSrc = camera.current.takePhoto();
     setImage(imageSrc);
-    setStep(2);
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
+    await recognizeText();
+    if (responseData != "No text detected") setStep(3);
     console.log("Here");
     // preprocess();
+  };
+
+  const getBase64FromBlobUrl = async (blobUrl) => {
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result.split(",")[1]); // Extract base64 part
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const getBase64Image = async (imageSrc) => {
+    if (imageSrc.startsWith("data:image")) {
+      return imageSrc.replace("data:", "").replace(/^.+,/, "");
+    } else if (imageSrc.startsWith("blob:")) {
+      return await getBase64FromBlobUrl(imageSrc);
+    }
+    throw new Error("Unsupported image source format");
+  };
+
+  const recognizeText = async () => {
+    const imagePreview = document.getElementById("imagePreview");
+
+    const base64Image = await getBase64Image(imagePreview.src);
+    // const worker = await createWorker();
+    console.time("Start");
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "https://australia-southeast1-oeege-436306.cloudfunctions.net/analyze-image",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ image: base64Image }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data);
+
+      if (data.detections == "No text detected") {
+        setResponseData("No text detected");
+        setText("No text detected");
+      } else {
+        setResponseData(data);
+        setText(data.detections[0].description);
+      }
+    } catch (error) {
+      console.error("Failed to fetch:", error);
+      setText("Failed to fetch data");
+    } finally {
+      setLoading(false);
+      console.timeEnd("Start");
+    }
   };
 
   // const preprocess = async () => {
@@ -92,66 +155,6 @@ function App() {
     // const processedImage = document.getElementById("processedImage");
 
     const button = document.getElementById("button");
-
-    const getBase64FromBlobUrl = async (blobUrl) => {
-      const response = await fetch(blobUrl);
-      const blob = await response.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve(reader.result.split(",")[1]); // Extract base64 part
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    };
-
-    const getBase64Image = async (imageSrc) => {
-      if (imageSrc.startsWith("data:image")) {
-        return imageSrc.replace("data:", "").replace(/^.+,/, "");
-      } else if (imageSrc.startsWith("blob:")) {
-        return await getBase64FromBlobUrl(imageSrc);
-      }
-      throw new Error("Unsupported image source format");
-    };
-
-    const recognizeText = async () => {
-      const base64Image = await getBase64Image(imagePreview.src);
-      // const worker = await createWorker();
-      console.time("Start");
-      setLoading(true);
-      try {
-        const response = await fetch(
-          "https://australia-southeast1-oeege-436306.cloudfunctions.net/analyze-image",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ image: base64Image }),
-          }
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log(data);
-
-        if (data.detections == "No text detected") {
-          setResponseData("No text detected");
-          setText("No text detected");
-        } else {
-          setResponseData(data);
-          setText(data.detections[0].description);
-        }
-      } catch (error) {
-        console.error("Failed to fetch:", error);
-        setText("Failed to fetch data");
-      } finally {
-        setLoading(false);
-        console.timeEnd("Start");
-      }
-    };
 
     fileInput.addEventListener("change", function (event) {
       const file = event.target.files[0];
@@ -237,28 +240,32 @@ function App() {
               alt="Selected Image"
               className="w-3/4 min-w-[344px] max-w-[768px] hidden"
             />
-            <div className="flex gap-x-4">
-              <button
-                className="btn w-48"
-                onClick={() => {
-                  setStep(1);
-                  setResponseData(null);
-                  setText("");
-                  window.scrollTo({
-                    top: 0,
-                    behavior: "smooth",
-                  });
-                }}
-              >
-                Take Another Picture
-              </button>
-              <button id="button" className="btn w-48">
-                Recognize Text
-              </button>
-            </div>
-            <div className="w-full ml-4 mr-4 max-w-2xl p-4 bg-white text-xs border">
-              {loading && <span class="loading loading-dots loading-xs"></span>}
-              {text == "No text detected" && <div>{text}</div>}
+            <div className="w-full px-4">
+              <div className="flex gap-x-4 mb-4">
+                <button
+                  className="btn w-48"
+                  onClick={() => {
+                    setStep(1);
+                    setResponseData(null);
+                    setText("");
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
+                  }}
+                >
+                  Take Another Picture
+                </button>
+                <button id="button" className="btn w-48">
+                  Recognize Text
+                </button>
+              </div>
+              <div className="w-full max-w-[768px] p-4 bg-white text-xs border">
+                {loading && (
+                  <span class="loading loading-dots loading-xs"></span>
+                )}
+                {responseData == "No text detected" && <div>No text detected</div>}
+              </div>
             </div>
           </div>
           <div
@@ -268,7 +275,12 @@ function App() {
             }`}
           >
             <div className="w-full flex justify-center mb-4">
-              {responseData && <P5Wrapper />}
+              {responseData && responseData == "No text detected" && (
+                <div>No text detected</div>
+              )}
+              {responseData && responseData != "No text detected" && (
+                <P5Wrapper />
+              )}
             </div>
             <div>
               <button
