@@ -147,6 +147,7 @@ function App() {
         setImage(imagePreview.src);
         setCameraEnabled(false);
         console.log("Here");
+        event.target.value = null;
       }
     });
 
@@ -159,6 +160,10 @@ function App() {
       fileInput.removeEventListener("change", () => {});
     };
   }, []);
+
+  useEffect(() => {
+    setResponseData(null);
+  }, [cameraEnabled]);
 
   // const p5WrapperRef = useRef(null);
   // useEffect(() => {
@@ -202,7 +207,7 @@ function App() {
                 </div>
               </div>
             )}
-            <div className="flex">
+            <div className="hidden sm:flex gap-x-4">
               <label className="label">Or Upload Image</label>
               <input
                 type="file"
@@ -212,32 +217,29 @@ function App() {
               />
             </div>
           </div>
-
           <div
             id="step2"
-            className={`w-full flex flex-col gap-y-4 ${
+            className={`container w-full flex flex-col items-center gap-y-4 ${
               cameraEnabled && "hidden"
             }`}
           >
+            <img
+              id="imagePreview"
+              alt="Selected Image"
+              className="w-full max-w-2xl hidden"
+            />
             <div className="flex gap-x-4">
-              <img
-                id="imagePreview"
-                alt="Selected Image"
-                style={{ maxWidth: "300px", display: "none" }}
-              />
-            </div>
-            {!cameraEnabled && (
               <button
                 className="btn w-48"
                 onClick={() => setCameraEnabled(true)}
               >
                 Take Another Picture
               </button>
-            )}
-            <button id="button" className="btn w-48">
-              Recognize Text
-            </button>
-            <div className="p-4 bg-white text-xs border">
+              <button id="button" className="btn w-48">
+                Recognize Text
+              </button>
+            </div>
+            <div className="w-full max-w-2xl p-4 bg-white text-xs border">
               {loading && (
                 <Spinner animation="border" role="status">
                   <span className="visually-hidden">Loading...</span>
