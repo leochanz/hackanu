@@ -8,7 +8,7 @@ export const sketch = (datavals, imgval, width) => (p) => {
   let chosenCentre = [0, 0];
   let imageToAnnotate, dyslexiaFont;
   let SCALEFACTOR;
-  const zoomLevel = 3
+  const zoomLevel = 2
   const fontXScale = 1.2
 
   p.preload = () => {
