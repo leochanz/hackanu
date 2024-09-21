@@ -26,7 +26,6 @@ function App() {
         sketch(responseData, image, width),
         sketchRef.current
       );
-
       return () => {
         p5Instance.remove();
       };
@@ -161,13 +160,14 @@ function App() {
     };
   }, []);
 
-  const p5WrapperRef = useRef(null);
-  useEffect(() => {
-    if (responseData) {
-      // Scroll to the P5Wrapper component
-      p5WrapperRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [responseData]);
+  // const p5WrapperRef = useRef(null);
+  // useEffect(() => {
+  //   if (responseData) {
+  //     // Scroll to the P5Wrapper component
+  //     // p5WrapperRef.current.scrollIntoView({ behavior: 'smooth' });
+  //     p5WrapperRef.current.scrollTo(0, 0);
+  //   }
+  // }, [responseData]);
 
   return (
     <div className="">
@@ -245,7 +245,7 @@ function App() {
               )}
               {!loading && <div>{text}</div>}
             </div>
-            <div ref={p5WrapperRef} className="w-full flex justify-center">
+            <div className="w-full flex justify-center">
               {responseData && <P5Wrapper />}
             </div>
           </div>
