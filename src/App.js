@@ -15,6 +15,7 @@ function App() {
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
   const [width, setWidth] = useState(window.innerWidth * 0.75);
+  const [step, setStep] = useState(1);
 
   const camera = useRef(null);
 
@@ -22,13 +23,17 @@ function App() {
     const sketchRef = useRef();
 
     useEffect(() => {
-      const p5Instance = new p5(
-        sketch(responseData, image, width),
-        sketchRef.current
-      );
-      return () => {
-        p5Instance.remove();
-      };
+      console.log("responseData:", responseData);
+      if (responseData != "No text detected") {
+        const p5Instance = new p5(
+          sketch(responseData, image, width),
+          sketchRef.current
+        );
+        setStep(3);
+        return () => {
+          p5Instance.remove();
+        };
+      }
     }, []);
 
     return <div ref={sketchRef}></div>;
@@ -38,7 +43,7 @@ function App() {
     const imagePreview = document.getElementById("imagePreview");
     const imageSrc = camera.current.takePhoto();
     setImage(imageSrc);
-    setCameraEnabled(false);
+    setStep(2);
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
     console.log("Here");
@@ -128,8 +133,14 @@ function App() {
         }
         const data = await response.json();
         console.log(data);
-        setResponseData(data);
-        setText(data.detections[0].description);
+
+        if (data.detections == "No text detected") {
+          setResponseData("No text detected");
+          setText("No text detected");
+        } else {
+          setResponseData(data);
+          setText(data.detections[0].description);
+        }
       } catch (error) {
         console.error("Failed to fetch:", error);
         setText("Failed to fetch data");
@@ -145,13 +156,14 @@ function App() {
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.style.display = "block";
         setImage(imagePreview.src);
-        setCameraEnabled(false);
+        setStep(2);
         console.log("Here");
         event.target.value = null;
       }
     });
 
     button.addEventListener("click", () => {
+      setStep(3);
       recognizeText();
       imagePreview.style.display = "block";
     });
@@ -162,8 +174,16 @@ function App() {
   }, []);
 
   useEffect(() => {
-    setResponseData(null);
-  }, [cameraEnabled]);
+    console.log("step", step);
+    if (step == 1) {
+      setResponseData(null);
+      setText("");
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [step]);
 
   // const p5WrapperRef = useRef(null);
   // useEffect(() => {
@@ -188,7 +208,7 @@ function App() {
           <div
             id="step1"
             className={`fixed sm:relative w-full flex flex-col items-center gap-y-4 ${
-              !cameraEnabled && "hidden"
+              step != 1 && "hidden"
             }`}
           >
             <div className="w-full flex flex-col items-center max-w-4xl relative">
@@ -219,7 +239,7 @@ function App() {
           <div
             id="step2"
             className={`container pt-4 w-full flex flex-col items-center gap-y-4 ${
-              cameraEnabled && "hidden"
+              step != 2 && "hidden"
             }`}
           >
             <img
@@ -228,26 +248,30 @@ function App() {
               className="w-3/4 max-w-2xl hidden"
             />
             <div className="flex gap-x-4">
-              <button
-                className="btn w-48"
-                onClick={() => setCameraEnabled(true)}
-              >
+              <button className="btn w-48" onClick={() => setStep(1)}>
                 Take Another Picture
               </button>
               <button id="button" className="btn w-48">
                 Recognize Text
               </button>
             </div>
-            <div className="w-full max-w-2xl p-4 bg-white text-xs border">
-              {loading && (
-                <Spinner animation="border" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-              )}
-              {!loading && <div>{text}</div>}
-            </div>
-            <div className="w-full flex justify-center mb-8">
-              {responseData && <P5Wrapper />}
+            <div
+              id="step3"
+              className={`container pt-4 w-full flex flex-col items-center gap-y-4 ${
+                step != 3 && "hidden"
+              }`}
+            >
+              <div className="w-full flex justify-center mb-8">
+                {responseData && <P5Wrapper />}
+              </div>
+              <div className="w-full max-w-2xl p-4 bg-white text-xs border">
+                {loading && (
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                )}
+                {!loading && <div>{text}</div>}
+              </div>
             </div>
           </div>
         </div>
