@@ -32,7 +32,6 @@ function App() {
           sketch(responseData, image, width),
           sketchRef.current
         );
-        setStep(3);
         return () => {
           p5Instance.remove();
         };
@@ -50,7 +49,6 @@ function App() {
 
     if (skipConfirmation) {
       await recognizeText();
-      if (responseData != "No text detected") setStep(3);
     } else {
       setStep(2);
     }
@@ -84,6 +82,7 @@ function App() {
     const base64Image = await getBase64Image(imagePreview.src);
     // const worker = await createWorker();
     console.time("Start");
+    setStep(3);
     setLoading(true);
     try {
       const response = await fetch(
@@ -170,7 +169,6 @@ function App() {
     });
 
     button.addEventListener("click", () => {
-      setStep(3);
       recognizeText();
       imagePreview.style.display = "block";
     });
@@ -276,6 +274,7 @@ function App() {
             }`}
           >
             <div className="w-full flex justify-center mb-4">
+              {loading && <span class="loading loading-dots loading-xs"></span>}
               {responseData && responseData == "No text detected" && (
                 <div>No text detected</div>
               )}
