@@ -237,19 +237,19 @@ function App() {
               </button>
             </div>
           )}
-          <input type="file" id="fileInput" accept="image/*" />
+          <input type="file" className="file-input file-input-bordered w-full max-w-xs" id="fileInput" accept="image/*" />
           <div className="flex gap-x-4">
             <img
               id="imagePreview"
               alt="Selected Image"
               style={{ maxWidth: "300px", display: "none" }}
             />
-            <canvas id="canvas" style={{ display: "none" }}></canvas>
+            {/* <canvas id="canvas" style={{ display: "none" }}></canvas>
             <img
               id="processedImage"
               alt="Processed Image"
               style={{ maxWidth: "300px", display: "none" }}
-            />
+            /> */}
           </div>
           {/* <p>
             Brightness:{" "}
@@ -271,7 +271,7 @@ function App() {
               defaultValue="90"
             />
           </p> */}
-          <button id="button" className="mt-8 btn w-48">
+          <button id="button" className="btn w-48">
             Recognize Text
           </button>
           <div className="p-4 bg-white text-xs border">
