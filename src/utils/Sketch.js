@@ -47,7 +47,7 @@ export const sketch = (datavals, imgval, width) => (p) => {
     }
 
     //buffer.background(255, 253, 208, 180)
-    buffer.filter(p.BLUR, 5);
+    //buffer.filter(p.BLUR, 5);
 
     buffer.fill("#00008B");
     for (let line of parsedLines) {
