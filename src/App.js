@@ -164,7 +164,11 @@ function App() {
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.style.display = "block";
         setImage(imagePreview.src);
-        setStep(2);
+        if (skipConfirmation) {
+          recognizeText();
+        } else {
+          setStep(2);
+        }
         console.log("Here");
         event.target.value = null;
       }
