@@ -147,6 +147,7 @@ function App() {
         setImage(imagePreview.src);
         setCameraEnabled(false);
         console.log("Here");
+        event.target.value = null;
       }
     });
 
@@ -160,6 +161,10 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    setResponseData(null);
+  }, [cameraEnabled]);
+
   // const p5WrapperRef = useRef(null);
   // useEffect(() => {
   //   if (responseData) {
@@ -169,40 +174,39 @@ function App() {
   //   }
   // }, [responseData]);
 
+  const phoneRatio = window.innerWidth / (window.innerHeight - 64);
+
   return (
-    <div className="">
+    <div className="fixed sm:relative w-full">
       <div className="navbar bg-blue-950 text-white">
         <div className="flex-1">
-          <a className="btn btn-ghost text-xl">DISLEXICLEAR</a>
+          <a className="btn btn-ghost text-xl">DYSLEXICLEAR</a>
         </div>
       </div>
       <div className="sm:mt-8 w-full flex justify-center">
         <div className="container">
           <div
             id="step1"
-            className={`w-full flex flex-col items-center gap-y-4 ${
+            className={`static sm:relative w-full flex flex-col items-center gap-y-4 ${
               !cameraEnabled && "hidden"
             }`}
           >
-            {cameraEnabled && (
-              <div className="w-full flex flex-col items-center max-w-4xl relative">
-                <Camera
-                  ref={camera}
-                  facingMode="environment"
-                  aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
-                />
-                <div className="absolute bottom-0 w-full flex justify-center">
-                  <button
-                    onClick={capture}
-                    className="btn btn-circle btn-lg border-none bg-white mb-1"
-                  >
-                    {/* <FaCamera /> */}
-                    <GiCircle className="size-full text-black" />
-                  </button>
-                </div>
+            <div className="w-full flex flex-col items-center max-w-4xl relative">
+              <Camera
+                ref={camera}
+                facingMode="environment"
+                aspectRatio={window.innerWidth > 640 ? 16 / 9 : phoneRatio}
+              />
+              <div className="absolute bottom-0 w-full flex justify-center">
+                <button
+                  onClick={capture}
+                  className="btn btn-circle btn-lg border-none bg-white mb-1"
+                >
+                  <GiCircle className="size-full text-black" />
+                </button>
               </div>
-            )}
-            <div className="flex">
+            </div>
+            <div className="hidden sm:flex gap-x-4">
               <label className="label">Or Upload Image</label>
               <input
                 type="file"
@@ -212,32 +216,29 @@ function App() {
               />
             </div>
           </div>
-
           <div
             id="step2"
-            className={`w-full flex flex-col gap-y-4 ${
+            className={`container w-full flex flex-col items-center gap-y-4 ${
               cameraEnabled && "hidden"
             }`}
           >
+            <img
+              id="imagePreview"
+              alt="Selected Image"
+              className="w-full max-w-2xl hidden"
+            />
             <div className="flex gap-x-4">
-              <img
-                id="imagePreview"
-                alt="Selected Image"
-                style={{ maxWidth: "300px", display: "none" }}
-              />
-            </div>
-            {!cameraEnabled && (
               <button
                 className="btn w-48"
                 onClick={() => setCameraEnabled(true)}
               >
                 Take Another Picture
               </button>
-            )}
-            <button id="button" className="btn w-48">
-              Recognize Text
-            </button>
-            <div className="p-4 bg-white text-xs border">
+              <button id="button" className="btn w-48">
+                Recognize Text
+              </button>
+            </div>
+            <div className="w-full max-w-2xl p-4 bg-white text-xs border">
               {loading && (
                 <Spinner animation="border" role="status">
                   <span className="visually-hidden">Loading...</span>
@@ -245,7 +246,7 @@ function App() {
               )}
               {!loading && <div>{text}</div>}
             </div>
-            <div className="w-full flex justify-center">
+            <div className="w-full flex justify-center mb-8">
               {responseData && <P5Wrapper />}
             </div>
           </div>
