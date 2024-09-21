@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
+import Spinner from "react-bootstrap/Spinner";
 import p5 from "p5";
 
 import { Camera } from "react-camera-pro";
@@ -25,7 +26,6 @@ function App() {
         sketch(responseData, image, width),
         sketchRef.current
       );
-
       return () => {
         p5Instance.remove();
       };
@@ -155,129 +155,100 @@ function App() {
       imagePreview.style.display = "block";
     });
 
-    // $("#brightness, #contrast").on("change", function () {
-    //   var brightness = $("#brightness").val() / 100;
-    //   var contrast = $("#contrast").val() / 100;
-
-    //   fxCanvas
-    //     .draw(texture)
-    //     .hueSaturation(-1, -1)
-    //     .unsharpMask(20, 2)
-    //     .brightnessContrast(brightness, contrast)
-    //     .update();
-
-    //   processedImage.src = fxCanvas.toDataURL();
-    // });
-
-    // Cleanup the event listener when the component unmounts
     return () => {
       fileInput.removeEventListener("change", () => {});
     };
-  }, []); // The empty array ensures this effect runs only once (after initial render)
+  }, []);
+
+  // const p5WrapperRef = useRef(null);
+  // useEffect(() => {
+  //   if (responseData) {
+  //     // Scroll to the P5Wrapper component
+  //     // p5WrapperRef.current.scrollIntoView({ behavior: 'smooth' });
+  //     p5WrapperRef.current.scrollTo(0, 0);
+  //   }
+  // }, [responseData]);
 
   return (
     <div className="">
-      {/* <div className="navbar bg-blue-950 text-white">
+      <div className="navbar bg-blue-950 text-white">
         <div className="flex-1">
           <a className="btn btn-ghost text-xl">DISLEXICLEAR</a>
         </div>
-        <div className="flex-none">
-          <ul className="menu menu-horizontal px-1">
-            <li>
-              <a>Link</a>
-            </li>
-            <li>
-              <details>
-                <summary>Parent</summary>
-                <ul className="bg-base-100 rounded-t-none p-2 text-black">
-                  <li>
-                    <a>Link 1</a>
-                  </li>
-                  <li>
-                    <a>Link 2</a>
-                  </li>
-                </ul>
-              </details>
-            </li>
-          </ul>
-        </div>
-      </div> */}
+      </div>
       <div className="sm:mt-8 w-full flex justify-center">
-        <div className="container w-full flex flex-col gap-y-4">
-          {cameraEnabled && (
-            <div className="w-full flex justify-center">
+        <div className="container">
+          <div
+            id="step1"
+            className={`w-full flex flex-col items-center gap-y-4 ${
+              !cameraEnabled && "hidden"
+            }`}
+          >
+            {cameraEnabled && (
               <div className="w-full flex flex-col items-center max-w-4xl relative">
                 <Camera
                   ref={camera}
                   facingMode="environment"
                   aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
                 />
+                <div className="absolute bottom-0 w-full flex justify-center">
                   <button
                     onClick={capture}
-                    className="btn btn-circle btn-lg border-none bg-white absolute right-1 inset-y-1/2"
+                    className="btn btn-circle btn-lg border-none bg-white mb-1"
                   >
                     {/* <FaCamera /> */}
                     <GiCircle className="size-full text-black" />
                   </button>
+                </div>
               </div>
+            )}
+            <div className="flex">
+              <label className="label">Or Upload Image</label>
+              <input
+                type="file"
+                className="file-input file-input-bordered w-full max-w-xs"
+                id="fileInput"
+                accept="image/*"
+              />
             </div>
-          )}
-          {!cameraEnabled && (
-            <div className="w-full flex justify-center">
+          </div>
+
+          <div
+            id="step2"
+            className={`w-full flex flex-col gap-y-4 ${
+              cameraEnabled && "hidden"
+            }`}
+          >
+            <div className="flex gap-x-4">
+              <img
+                id="imagePreview"
+                alt="Selected Image"
+                style={{ maxWidth: "300px", display: "none" }}
+              />
+            </div>
+            {!cameraEnabled && (
               <button
                 className="btn w-48"
                 onClick={() => setCameraEnabled(true)}
               >
                 Take Another Picture
               </button>
+            )}
+            <button id="button" className="btn w-48">
+              Recognize Text
+            </button>
+            <div className="p-4 bg-white text-xs border">
+              {loading && (
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              )}
+              {!loading && <div>{text}</div>}
             </div>
-          )}
-          <input type="file" id="fileInput" accept="image/*" />
-          <div className="flex gap-x-4">
-            <img
-              id="imagePreview"
-              alt="Selected Image"
-              style={{ maxWidth: "300px", display: "none" }}
-            />
-            <canvas id="canvas" style={{ display: "none" }}></canvas>
-            <img
-              id="processedImage"
-              alt="Processed Image"
-              style={{ maxWidth: "300px", display: "none" }}
-            />
-          </div>
-          {/* <p>
-            Brightness:{" "}
-            <input
-              type="range"
-              min="0"
-              max="100"
-              id="brightness"
-              defaultValue="20"
-            />
-          </p>
-          <p>
-            Contrast:{" "}
-            <input
-              type="range"
-              min="0"
-              max="100"
-              id="contrast"
-              defaultValue="90"
-            />
-          </p> */}
-          <button id="button" className="mt-8 btn w-48">
-            Recognize Text
-          </button>
-          <div className="p-4 bg-white text-xs border">
-            {loading && <div>Loading...</div>}
-            {text}
-          </div>
-          {responseData && (
             <div className="w-full flex justify-center">
-              <P5Wrapper />
+              {responseData && <P5Wrapper />}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
