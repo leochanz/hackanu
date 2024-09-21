@@ -14,7 +14,10 @@ function App() {
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
-  const [width, setWidth] = useState(window.innerWidth * 0.75 > 344 ? window.innerWidth * 0.75  : 344);
+  let sketchWidth = window.innerWidth * 0.75;
+  if (sketchWidth > 640) sketchWidth = 640;
+  if (sketchWidth < 344) sketchWidth = 344;
+  const [width, setWidth] = useState(sketchWidth);
   const [step, setStep] = useState(1);
 
   const camera = useRef(null);
@@ -198,7 +201,7 @@ function App() {
               step != 1 && "hidden"
             }`}
           >
-            <div className="w-full flex flex-col items-center max-w-4xl relative">
+            <div className="w-full sm:w-3/4 flex flex-col items-center max-w-[640px] relative">
               <Camera
                 ref={camera}
                 facingMode="environment"
@@ -225,14 +228,14 @@ function App() {
           </div>
           <div
             id="step2"
-            className={`container pt-4 w-full flex flex-col items-center gap-y-4 ${
+            className={`pt-4 w-full flex flex-col items-center gap-y-4 ${
               step != 2 && "hidden"
             }`}
           >
             <img
               id="imagePreview"
               alt="Selected Image"
-              className="w-4/5 min-w-[344px] max-w-2xl hidden"
+              className="w-3/4 min-w-[344px] max-w-[640px] hidden"
             />
             <div className="flex gap-x-4">
               <button
