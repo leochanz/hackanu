@@ -7,6 +7,7 @@ export const sketch = (data, img, width) => (p) => {
   let imageToAnnotate, dyslexiaFont;
   let SCALEFACTOR ;
   let minSize;
+  const zoomLevel = 3
 
   p.preload = () => {
     imageToAnnotate = p.loadImage(img);
@@ -19,7 +20,7 @@ export const sketch = (data, img, width) => (p) => {
       imageToAnnotate.width * SCALEFACTOR,
       imageToAnnotate.height * SCALEFACTOR
     );
-    minSize = Math.min(imageToAnnotate.width, imageToAnnotate.height) * 0.05
+    minSize = Math.max(imageToAnnotate.width, imageToAnnotate.height) * 0.05
     p.createCanvas(imageToAnnotate.width, imageToAnnotate.height);
     chosenCentre = [imageToAnnotate.width / 2, imageToAnnotate.height / 2];
     console.log(chosenCentre)
@@ -70,12 +71,14 @@ export const sketch = (data, img, width) => (p) => {
   p.mouseClicked = () => {
     if (buffer && chosenCentre){
       if (zoom === 1) {
-        zoom = 3;
+        let boundMouseX = Math.max(buffer.width/(2*zoomLevel), Math.min(p.mouseX, buffer.width - (buffer.width/(2*zoomLevel))));
+        let boundMouseY = Math.max(buffer.height/(2*zoomLevel), Math.min(p.mouseY, buffer.height - (buffer.height/(2*zoomLevel))));
+        zoom = zoomLevel;
         let cx = chosenCentre[0];
         let cy = chosenCentre[1];
         chosenCentre = [
-          (zoom + 1) * cx - zoom * p.mouseX,
-          (zoom + 1) * cy - zoom * p.mouseY,
+          (zoom + 1) * cx - zoom * boundMouseX,
+          (zoom + 1) * cy - zoom * boundMouseY,
         ];
       } else {
         zoom = 1;
