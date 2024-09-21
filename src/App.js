@@ -184,10 +184,9 @@ function App() {
         </div>
       </div>
       <div className="sm:mt-8 w-full flex justify-center">
-        <div className="container w-full flex flex-col gap-y-4">
-          <div id="step1" className="w-full flex flex-col gap-y-4">
+        <div className="container">
+          <div id="step1" className={`w-full flex flex-col items-center gap-y-4 ${!cameraEnabled && "hidden"}`}>
             {cameraEnabled && (
-              <div className="w-full flex justify-center">
                 <div className="w-full flex flex-col items-center max-w-4xl relative">
                   <Camera
                     ref={camera}
@@ -204,17 +203,6 @@ function App() {
                     </button>
                   </div>
                 </div>
-              </div>
-            )}
-            {!cameraEnabled && (
-              <div className="mt-2 w-full flex justify-center">
-                <button
-                  className="btn w-48"
-                  onClick={() => setCameraEnabled(true)}
-                >
-                  Take Another Picture
-                </button>
-              </div>
             )}
             <div className="flex">
               <label className="label">Or Upload Image</label>
@@ -227,29 +215,39 @@ function App() {
             </div>
           </div>
 
-          <div className="flex gap-x-4">
-            <img
-              id="imagePreview"
-              alt="Selected Image"
-              style={{ maxWidth: "300px", display: "none" }}
-            />
-          </div>
-          <button id="button" className="btn w-48">
-            Recognize Text
-          </button>
-          <div className="p-4 bg-white text-xs border">
-            {loading && (
-              <Spinner animation="border" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
-            )}
-            {!loading && <div>{text}</div>}
-          </div>
-          {responseData && (
-            <div className="w-full flex justify-center">
-              <P5Wrapper />
+          <div id="step2" className={`w-full flex flex-col gap-y-4 ${cameraEnabled && "hidden"}`}>
+            <div className="flex gap-x-4">
+              <img
+                id="imagePreview"
+                alt="Selected Image"
+                style={{ maxWidth: "300px", display: "none" }}
+              />
             </div>
-          )}
+            {!cameraEnabled && (
+                <button
+                  className="btn w-48"
+                  onClick={() => setCameraEnabled(true)}
+                >
+                  Take Another Picture
+                </button>
+            )}
+            <button id="button" className="btn w-48">
+              Recognize Text
+            </button>
+            <div className="p-4 bg-white text-xs border">
+              {loading && (
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              )}
+              {!loading && <div>{text}</div>}
+            </div>
+            {responseData && (
+              <div className="w-full flex justify-center">
+                <P5Wrapper />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
