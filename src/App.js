@@ -237,7 +237,7 @@ function App() {
           </div>
           <div
             id="step2"
-            className={`pt-4 w-full flex flex-col items-center gap-y-4 ${
+            className={`w-full flex flex-col items-center gap-y-4 ${
               step != 2 && "hidden"
             }`}
           >
@@ -277,7 +277,7 @@ function App() {
           </div>
           <div
             id="step3"
-            className={`container pt-4 w-full flex flex-col items-center ${
+            className={`container w-full flex flex-col items-center ${
               step != 3 && "hidden"
             }`}
           >
