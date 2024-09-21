@@ -96,13 +96,13 @@ export const sketch = (data, img, width) => (p) => {
         bounds: element["boundingPoly"],
       });
     }
-    return badBoxConversion(parsed);
-  }
+    return combLines(badBoxConversion(parsed));
+  } 
 
   function findBestFontSize(text, boxWidth, boxHeight) {
-    let low = 1;
+    let low = buffer.height/80;
     let high = 1000;
-    let bestSize = 1;
+    let bestSize = buffer.height/80;
 
     while (low <= high) {
       let currentSize = Math.floor((low + high) / 2);
@@ -161,3 +161,27 @@ export const sketch = (data, img, width) => (p) => {
     return processed;
   }
 };
+
+
+function combLines(lines){
+  let combined = []
+  for (let line of lines){
+    if (combined[combined.length - 1]) {
+      let previousBlock = combined[combined.length - 1]
+      let currentMid = line['bby'] + line['height']/2
+      let midLine = previousBlock['bby'] + previousBlock['height']/2
+      if (Math.abs(currentMid - midLine) < previousBlock['height']/2) {
+        previousBlock['text'] += ' ' + line['text']
+        previousBlock['height'] = Math.max(previousBlock['bby'] + previousBlock['height'], line['bby'] + line['height']) - Math.min(previousBlock['bby'], line['bby'])
+        previousBlock['bby'] = Math.min(previousBlock['bby'], line['bby'])
+        previousBlock['width'] = line['bbx'] + line['width'] - previousBlock['bbx'] 
+      } else {
+        combined.push(line)
+      }
+    } else {
+      combined.push(line)
+    }
+  }
+
+  return combined
+}
