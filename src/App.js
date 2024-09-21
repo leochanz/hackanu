@@ -9,7 +9,7 @@ import { GiCircle } from "react-icons/gi";
 import { sketch } from "./utils/Sketch.js";
 
 function App() {
-  const skipConfirmation = true;
+  const skipConfirmation = false;
 
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
@@ -47,12 +47,10 @@ function App() {
     const imageSrc = camera.current.takePhoto();
     setImage(imageSrc);
     imagePreview.src = imageSrc;
-    imagePreview.style.display = "block";
 
     if (skipConfirmation) {
       await recognizeText();
       if (responseData != "No text detected") setStep(3);
-      console.log("Here");
     } else {
       setStep(2);
     }
@@ -242,9 +240,9 @@ function App() {
             <img
               id="imagePreview"
               alt="Selected Image"
-              className="w-3/4 min-w-[344px] max-w-[768px] hidden"
+              className="w-3/4 min-w-[344px] max-w-[768px]"
             />
-            <div className="w-full px-4">
+            <div className="w-full flex flex-col items-center px-4">
               <div className="flex gap-x-4 mb-4">
                 <button
                   className="btn w-48"
