@@ -177,10 +177,10 @@ function App() {
   const phoneRatio = window.innerWidth / (window.innerHeight - 64);
 
   return (
-    <div className="">
+    <div className="fixed sm:relative w-full">
       <div className="navbar bg-blue-950 text-white">
         <div className="flex-1">
-          <a className="btn btn-ghost text-xl">DISLEXICLEAR</a>
+          <a className="btn btn-ghost text-xl">DYSLEXICLEAR</a>
         </div>
       </div>
       <div className="sm:mt-8 w-full flex justify-center">
