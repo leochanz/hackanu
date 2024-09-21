@@ -163,7 +163,6 @@ function App() {
     });
 
     button.addEventListener("click", () => {
-      setStep(3);
       recognizeText();
       imagePreview.style.display = "block";
     });
@@ -172,18 +171,6 @@ function App() {
       fileInput.removeEventListener("change", () => {});
     };
   }, []);
-
-  useEffect(() => {
-    console.log("step", step);
-    if (step == 1) {
-      setResponseData(null);
-      setText("");
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-    }
-  }, [step]);
 
   // const p5WrapperRef = useRef(null);
   // useEffect(() => {
@@ -245,33 +232,56 @@ function App() {
             <img
               id="imagePreview"
               alt="Selected Image"
-              className="w-3/4 max-w-2xl hidden"
+              className="w-4/5 min-w-[344px] max-w-2xl hidden"
             />
             <div className="flex gap-x-4">
-              <button className="btn w-48" onClick={() => setStep(1)}>
+              <button
+                className="btn w-48"
+                onClick={() => {
+                  setStep(1);
+                  setResponseData(null);
+                  setText("");
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+              >
                 Take Another Picture
               </button>
               <button id="button" className="btn w-48">
                 Recognize Text
               </button>
             </div>
-            <div
-              id="step3"
-              className={`container pt-4 w-full flex flex-col items-center gap-y-4 ${
-                step != 3 && "hidden"
-              }`}
-            >
-              <div className="w-full flex justify-center mb-8">
-                {responseData && <P5Wrapper />}
-              </div>
-              <div className="w-full max-w-2xl p-4 bg-white text-xs border">
-                {loading && (
-                  <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </Spinner>
-                )}
-                {!loading && <div>{text}</div>}
-              </div>
+            <div className="w-full ml-4 mr-4 max-w-2xl p-4 bg-white text-xs border">
+              {loading && <span class="loading loading-dots loading-xs"></span>}
+              {text == "No text detected" && <div>{text}</div>}
+            </div>
+          </div>
+          <div
+            id="step3"
+            className={`container pt-4 w-full flex flex-col items-center gap-y-4 ${
+              step != 3 && "hidden"
+            }`}
+          >
+            <div className="w-full flex justify-center mb-8">
+              {responseData && <P5Wrapper />}
+            </div>
+            <div className="flex gap-x-4">
+              <button
+                className="btn w-48"
+                onClick={() => {
+                  setStep(1);
+                  setResponseData(null);
+                  setText("");
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+              >
+                Take Another Picture
+              </button>
             </div>
           </div>
         </div>
