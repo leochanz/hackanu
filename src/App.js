@@ -20,13 +20,10 @@ function App() {
   const [image, setImage] = useState(null);
 
   const capture = () => {
-    const imageSrc = camera.current.takePhoto();
-    setImage(camera.current.takePhoto());
-
     const imagePreview = document.getElementById("imagePreview");
-    // const imageSrc = getScreenshot();
-    setCameraEnabled(false);
+    const imageSrc = camera.current.takePhoto();
     setImage(imageSrc);
+    setCameraEnabled(false);
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
     console.log("Here");
@@ -72,7 +69,6 @@ function App() {
     const processedImage = document.getElementById("processedImage");
 
     const button = document.getElementById("button");
-    const capturePhoto = document.getElementById("capturePhoto");
 
     const recognizeText = async () => {
       const worker = await createWorker();
@@ -93,7 +89,7 @@ function App() {
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.style.display = "block";
         console.log("Here");
-        preprocess();
+        // preprocess();
       }
     });
 
@@ -102,26 +98,19 @@ function App() {
       imagePreview.style.display = "block";
     });
 
-    // capturePhoto.addEventListener("click", () => {
-    //   imagePreview.src = screenshot;
-    //   imagePreview.style.display = "block";
-    //   console.log("Here");
-    //   preprocess();
+    // $("#brightness, #contrast").on("change", function () {
+    //   var brightness = $("#brightness").val() / 100;
+    //   var contrast = $("#contrast").val() / 100;
+
+    //   fxCanvas
+    //     .draw(texture)
+    //     .hueSaturation(-1, -1)
+    //     .unsharpMask(20, 2)
+    //     .brightnessContrast(brightness, contrast)
+    //     .update();
+
+    //   processedImage.src = fxCanvas.toDataURL();
     // });
-
-    $("#brightness, #contrast").on("change", function () {
-      var brightness = $("#brightness").val() / 100;
-      var contrast = $("#contrast").val() / 100;
-
-      fxCanvas
-        .draw(texture)
-        .hueSaturation(-1, -1)
-        .unsharpMask(20, 2)
-        .brightnessContrast(brightness, contrast)
-        .update();
-
-      processedImage.src = fxCanvas.toDataURL();
-    });
 
     // Cleanup the event listener when the component unmounts
     return () => {
@@ -158,12 +147,12 @@ function App() {
       </div> */}
       <div className="sm:mt-8 w-full flex justify-center">
         <div className="container w-full flex flex-col gap-y-4">
-          {/* <WebcamCapture /> */}
           {cameraEnabled && (
             <div className="w-full flex justify-center">
               <div className="w-full flex flex-col items-center gap-y-2 max-w-4xl">
                 <Camera
                   ref={camera}
+                  facingMode="environment"
                   aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
                 />
                 <button onClick={capture} className="btn btn-circle">
@@ -193,7 +182,7 @@ function App() {
               style={{ maxWidth: "300px", display: "none" }}
             />
           </div>
-          <p>
+          {/* <p>
             Brightness:{" "}
             <input
               type="range"
@@ -212,7 +201,7 @@ function App() {
               id="contrast"
               defaultValue="90"
             />
-          </p>
+          </p> */}
           <button id="button" className="btn w-48">
             Recognize Text
           </button>
