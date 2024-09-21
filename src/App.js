@@ -6,8 +6,6 @@ import fx from "glfx";
 import p5 from "p5";
 
 import { Camera } from "react-camera-pro";
-import { FaCamera } from "react-icons/fa";
-import { FaRegCircle } from "react-icons/fa";
 import { GiCircle } from "react-icons/gi";
 
 import { sketch } from "./utils/Sketch.js";
@@ -217,13 +215,15 @@ function App() {
                   facingMode="environment"
                   aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
                 />
+                <div className="absolute bottom-0 w-full flex justify-center">
                   <button
                     onClick={capture}
-                    className="btn btn-circle btn-lg border-none bg-white absolute right-1 inset-y-1/2"
+                    className="btn btn-circle btn-lg border-none bg-white mb-1"
                   >
                     {/* <FaCamera /> */}
                     <GiCircle className="size-full text-black" />
                   </button>
+                </div>
               </div>
             </div>
           )}
