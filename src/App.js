@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
-import { createWorker } from "tesseract.js";
-import $ from "jquery";
-import fx from "glfx";
 import p5 from "p5";
 
 import { Camera } from "react-camera-pro";
-import { FaCamera } from "react-icons/fa";
-import { FaRegCircle } from "react-icons/fa";
 import { GiCircle } from "react-icons/gi";
 
 import { sketch } from "./utils/Sketch.js";
