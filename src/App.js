@@ -10,6 +10,7 @@ function App() {
   var texture = null;
 
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fileInput = document.getElementById("fileInput");
@@ -21,17 +22,20 @@ function App() {
     const recognizeText = async () => {
       const worker = await createWorker();
       console.time("Start");
+      setLoading(true);
       const ret = await worker.recognize(processedImage.src);
+      setLoading(false);
+      // const ret = await worker.recognize(imagePreview.src);
       console.timeEnd("Start");
       console.log(ret.data.text);
       setText(ret.data.text);
       await worker.terminate();
     };
-    
+
     const preprocess = () => {
       const ctx = canvas.getContext("2d");
       const img = new Image();
-      
+
       img.onload = function () {
         canvas.width = img.width;
         canvas.height = img.height;
@@ -72,11 +76,12 @@ function App() {
       imagePreview.style.display = "block";
     });
 
-    $('#brightness, #contrast').on('change', function () {
-      var brightness = $('#brightness').val() / 100;
-      var contrast = $('#contrast').val() / 100;
+    $("#brightness, #contrast").on("change", function () {
+      var brightness = $("#brightness").val() / 100;
+      var contrast = $("#contrast").val() / 100;
 
-      fxCanvas.draw(texture)
+      fxCanvas
+        .draw(texture)
         .hueSaturation(-1, -1)
         .unsharpMask(20, 2)
         .brightnessContrast(brightness, contrast)
@@ -92,31 +97,77 @@ function App() {
   }, []); // The empty array ensures this effect runs only once (after initial render)
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <input type="file" id="fileInput" accept="image/*" />
-        <div style={{"display" : "flex"}}>
-        <img
-          id="imagePreview"
-          alt="Selected Image"
-          style={{ maxWidth: "300px", display: "none" }}
-        />
-        <canvas id="canvas" style={{ display: "none" }}></canvas>
-        <img
-          id="processedImage"
-          alt="Processed Image"
-          style={{ maxWidth: "300px", display: "none" }}
-        />
+    <div className="">
+      <div className="navbar bg-blue-950 text-white">
+        <div className="flex-1">
+          <a className="btn btn-ghost text-xl">DISLEXICLEAR</a>
         </div>
-        <p>Brightness: <input type="range" min="0" max="100" id="brightness" defaultValue="20" /></p>
-        <p>Contrast: <input type="range" min="0" max="100" id="contrast" defaultValue="90" /></p>
-        <button id="button">Recognize Text</button>
-        <div style={{"padding": "4px", "background" : "white", "border": "1px", "fontSize" : "12px", "color" : "black"}}>{text}</div>
-      </header>
+        <div className="flex-none">
+          <ul className="menu menu-horizontal px-1">
+            <li>
+              <a>Link</a>
+            </li>
+            <li>
+              <details>
+                <summary>Parent</summary>
+                <ul className="bg-base-100 rounded-t-none p-2 text-black">
+                  <li>
+                    <a>Link 1</a>
+                  </li>
+                  <li>
+                    <a>Link 2</a>
+                  </li>
+                </ul>
+              </details>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div className="mt-8 w-full flex justify-center">
+        <div className="container w-full flex flex-col gap-y-4">
+          <input type="file" id="fileInput" accept="image/*" />
+          <div className="flex gap-x-4">
+            <img
+              id="imagePreview"
+              alt="Selected Image"
+              style={{ maxWidth: "300px", display: "none" }}
+            />
+            <canvas id="canvas" style={{ display: "none" }}></canvas>
+            <img
+              id="processedImage"
+              alt="Processed Image"
+              style={{ maxWidth: "300px", display: "none" }}
+            />
+          </div>
+          <p>
+            Brightness:{" "}
+            <input
+              type="range"
+              min="0"
+              max="100"
+              id="brightness"
+              defaultValue="20"
+            />
+          </p>
+          <p>
+            Contrast:{" "}
+            <input
+              type="range"
+              min="0"
+              max="100"
+              id="contrast"
+              defaultValue="90"
+            />
+          </p>
+          <button id="button" className="btn w-48">
+            Recognize Text
+          </button>
+          <div className="p-4 bg-white text-xs border">
+            {loading && <div>Loading...</div>}
+            {text}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
