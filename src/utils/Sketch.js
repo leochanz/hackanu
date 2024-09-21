@@ -35,11 +35,12 @@ export const sketch = (data, img, width) => (p) => {
     for (let line of parsedLines) {
       buffer.push();
       let textPos = boxCentre(line);
-      buffer.rect(textPos.x, textPos.y, line["width"]*1.1, line["height"]*1.1);
+      buffer.rect(textPos.x, textPos.y, line["width"]*1.1, line["height"]*1.1, line['height']/10);
       buffer.pop();
     }
 
-    //buffer.filter(p.BLUR, 10);
+    //buffer.background(255, 253, 208, 255)
+    //buffer.filter(p.BLUR, 5);
 
     buffer.fill("#00008B");
     for (let line of parsedLines) {
@@ -170,7 +171,7 @@ function combLines(lines){
       let previousBlock = combined[combined.length - 1]
       let currentMid = line['bby'] + line['height']/2
       let midLine = previousBlock['bby'] + previousBlock['height']/2
-      if (Math.abs(currentMid - midLine) < previousBlock['height']/2 && previousBlock['bbx'] < line['bbx']) {
+      if (Math.abs(currentMid - midLine) < previousBlock['height']/2 && previousBlock['bbx'] + 0.75* previousBlock['width'] < line['bbx']) {
         previousBlock['text'] += ' ' + line['text']
         previousBlock['height'] = Math.max(previousBlock['bby'] + previousBlock['height'], line['bby'] + line['height']) - Math.min(previousBlock['bby'], line['bby'])
         previousBlock['bby'] = Math.min(previousBlock['bby'], line['bby'])
