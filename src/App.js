@@ -66,12 +66,9 @@ function App() {
   useEffect(() => {
     const fileInput = document.getElementById("fileInput");
     const imagePreview = document.getElementById("imagePreview");
-    const processedImage = document.getElementById("processedImage");
+    // const processedImage = document.getElementById("processedImage");
 
     const button = document.getElementById("button");
-
-    const getBase64StringFromDataURL = (dataURL) =>
-      dataURL.replace('data:', '').replace(/^.+,/, '');
     
     const getBase64FromBlobUrl = async (blobUrl) => {
       const response = await fetch(blobUrl);
@@ -88,7 +85,7 @@ function App() {
   
     const getBase64Image = async (imageSrc) => {
       if (imageSrc.startsWith('data:image')) {
-        return imageSrc.split(',')[1];
+        return imageSrc.replace('data:', '').replace(/^.+,/, '');
       } else if (imageSrc.startsWith('blob:')) {
         return await getBase64FromBlobUrl(imageSrc);
       }
@@ -98,10 +95,6 @@ function App() {
     const recognizeText = async () => {
       const base64Image = await getBase64Image(imagePreview.src);
       // const worker = await createWorker();
-      console.log("image source:")
-      console.log(imagePreview.src);
-      console.log("base64 image:");
-      console.log(base64Image);
       console.time("Start");
       setLoading(true);
       try {
@@ -121,7 +114,8 @@ function App() {
         const data = await response.json();
         console.log(data);
         setData(data);
-        setText("done!");
+        const descriptions = data.detections.map(detection => detection.description).join(', ');
+        setText(descriptions);
       } catch (error) {
         console.error("Failed to fetch:", error);
         setText("Failed to fetch data");
