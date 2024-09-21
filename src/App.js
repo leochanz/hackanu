@@ -1,6 +1,10 @@
 import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { createWorker } from 'tesseract.js';
+
+
+
 
 function App() {
 
@@ -8,13 +12,28 @@ function App() {
     const fileInput = document.getElementById('fileInput');
     const imagePreview = document.getElementById('imagePreview');
 
+    const recognizeText = async () => {
+      const worker = await createWorker();
+      console.time("Start");
+      const ret = await worker.recognize(imagePreview.src);
+      console.timeEnd("Start");
+      console.log(ret.data.text);
+      await worker.terminate();
+    };
+
     fileInput.addEventListener('change', function(event) {
       const file = event.target.files[0];
       if (file) {
         imagePreview.src = URL.createObjectURL(file);
+        console.log("Here")
+        recognizeText();
         imagePreview.style.display = 'block';
       }
     });
+
+    
+    
+    
 
     // Cleanup the event listener when the component unmounts
     return () => {
