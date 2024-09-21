@@ -173,9 +173,11 @@ function App() {
             </div>
           )}
           {!cameraEnabled && (
-            <button onClick={() => setCameraEnabled(true)}>
-              Take Another Picture
-            </button>
+            <div className="w-full flex justify-center">
+              <button className="btn w-48" onClick={() => setCameraEnabled(true)}>
+                Take Another Picture
+              </button>
+            </div>
           )}
           <input type="file" id="fileInput" accept="image/*" />
           <div className="flex gap-x-4">
