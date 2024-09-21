@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/hackanu/static/css/main.f33dcfb8.css",
+    "main.js": "/hackanu/static/js/main.f610f27a.js",
+    "static/js/453.a6a97343.chunk.js": "/hackanu/static/js/453.a6a97343.chunk.js",
+    "static/media/logo.svg": "/hackanu/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/hackanu/index.html",
+    "main.f33dcfb8.css.map": "/hackanu/static/css/main.f33dcfb8.css.map",
+    "main.f610f27a.js.map": "/hackanu/static/js/main.f610f27a.js.map",
+    "453.a6a97343.chunk.js.map": "/hackanu/static/js/453.a6a97343.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f33dcfb8.css",
+    "static/js/main.f610f27a.js"
+  ]
+}
