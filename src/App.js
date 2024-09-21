@@ -4,6 +4,8 @@ import Spinner from "react-bootstrap/Spinner";
 import p5 from "p5";
 
 import { Camera } from "react-camera-pro";
+
+import { FaCamera } from "react-icons/fa";
 import { GiCircle } from "react-icons/gi";
 
 import { sketch } from "./utils/Sketch.js";
@@ -162,7 +164,11 @@ function App() {
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.style.display = "block";
         setImage(imagePreview.src);
-        setStep(2);
+        if (skipConfirmation) {
+          recognizeText();
+        } else {
+          setStep(2);
+        }
         console.log("Here");
         event.target.value = null;
       }
@@ -286,7 +292,7 @@ function App() {
             </div>
             <div>
               <button
-                className="btn w-48 mb-8"
+                className="btn w-52 mb-8"
                 onClick={() => {
                   setStep(1);
                   setResponseData(null);
@@ -296,7 +302,7 @@ function App() {
                   });
                 }}
               >
-                Take Another Picture
+                Take Another Picture <FaCamera />
               </button>
             </div>
           </div>
