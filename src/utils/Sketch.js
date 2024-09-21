@@ -5,8 +5,7 @@ export const sketch = (data, img, width) => (p) => {
   let zoom = 1;
   let chosenCentre = [0, 0];
   let imageToAnnotate, dyslexiaFont;
-  let SCALEFACTOR ;
-  let minSize;
+  let SCALEFACTOR;
   const zoomLevel = 3
 
   p.preload = () => {
@@ -20,16 +19,15 @@ export const sketch = (data, img, width) => (p) => {
       imageToAnnotate.width * SCALEFACTOR,
       imageToAnnotate.height * SCALEFACTOR
     );
-    minSize = Math.max(imageToAnnotate.width, imageToAnnotate.height) * 0.05
     p.createCanvas(imageToAnnotate.width, imageToAnnotate.height);
     chosenCentre = [imageToAnnotate.width / 2, imageToAnnotate.height / 2];
-    console.log(chosenCentre)
     buffer = p.createGraphics(imageToAnnotate.width, imageToAnnotate.height);
     buffer.noStroke();
     buffer.image(imageToAnnotate, 0, 0);
     buffer.textFont(dyslexiaFont);
     buffer.textAlign(p.CENTER, p.CENTER);
     p.imageMode(p.CENTER);
+    buffer.rectMode(p.CENTER);
 
     let parsedLines = parseLines(data);
 
@@ -37,10 +35,7 @@ export const sketch = (data, img, width) => (p) => {
     for (let line of parsedLines) {
       buffer.push();
       let textPos = boxCentre(line);
-      buffer.textSize(
-        findBestFontSize(line["text"], line["width"], line["height"])
-      );
-      buffer.rect(line["bbx"], line["bby"], line["width"], line["height"]);
+      buffer.rect(textPos.x, textPos.y, line["width"]*1.1, line["height"]*1.1);
       buffer.pop();
     }
 
@@ -51,7 +46,7 @@ export const sketch = (data, img, width) => (p) => {
       buffer.push();
       let textPos = boxCentre(line);
       buffer.textSize(
-        findBestFontSize(line["text"] + "A", line["width"], line["height"])
+        findBestFontSize(line["text"], line["width"], line["height"])
       );
       buffer.text(line["text"], textPos.x, textPos.y);
       buffer.pop();
@@ -101,13 +96,13 @@ export const sketch = (data, img, width) => (p) => {
         bounds: element["boundingPoly"],
       });
     }
-    return badBoxConversion(parsed);
-  }
+    return combLines(badBoxConversion(parsed));
+  } 
 
   function findBestFontSize(text, boxWidth, boxHeight) {
-    let low = 1;
+    let low = buffer.height/80;
     let high = 1000;
-    let bestSize = 1;
+    let bestSize = buffer.height/80;
 
     while (low <= high) {
       let currentSize = Math.floor((low + high) / 2);
@@ -158,11 +153,35 @@ export const sketch = (data, img, width) => (p) => {
       processed.push({
         bbx: boxLeft*SCALEFACTOR,
         bby: boxTop*SCALEFACTOR,
-        width: Math.max(boxWidth*SCALEFACTOR, minSize),
-        height: Math.max(boxHeight*SCALEFACTOR, minSize),
+        width: boxWidth*SCALEFACTOR,
+        height: boxHeight*SCALEFACTOR,
         text: box["text"],
       });
     }
     return processed;
   }
 };
+
+
+function combLines(lines){
+  let combined = []
+  for (let line of lines){
+    if (combined[combined.length - 1]) {
+      let previousBlock = combined[combined.length - 1]
+      let currentMid = line['bby'] + line['height']/2
+      let midLine = previousBlock['bby'] + previousBlock['height']/2
+      if (Math.abs(currentMid - midLine) < previousBlock['height']/2) {
+        previousBlock['text'] += ' ' + line['text']
+        previousBlock['height'] = Math.max(previousBlock['bby'] + previousBlock['height'], line['bby'] + line['height']) - Math.min(previousBlock['bby'], line['bby'])
+        previousBlock['bby'] = Math.min(previousBlock['bby'], line['bby'])
+        previousBlock['width'] = line['bbx'] + line['width'] - previousBlock['bbx'] 
+      } else {
+        combined.push(line)
+      }
+    } else {
+      combined.push(line)
+    }
+  }
+
+  return combined
+}
