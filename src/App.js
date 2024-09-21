@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import { createWorker } from "tesseract.js";
 import $ from "jquery";
 import fx from "glfx";
+
+import { Camera } from "react-camera-pro";
+import { FaCamera } from "react-icons/fa";
 
 function App() {
   var fxCanvas = fx.canvas();
@@ -11,13 +14,65 @@ function App() {
 
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cameraEnabled, setCameraEnabled] = useState(true);
+
+  const camera = useRef(null);
+  const [image, setImage] = useState(null);
+
+  const capture = () => {
+    const imageSrc = camera.current.takePhoto();
+    setImage(camera.current.takePhoto());
+
+    const imagePreview = document.getElementById("imagePreview");
+    // const imageSrc = getScreenshot();
+    setCameraEnabled(false);
+    setImage(imageSrc);
+    imagePreview.src = imageSrc;
+    imagePreview.style.display = "block";
+    console.log("Here");
+    preprocess();
+  };
+
+  const preprocess = async () => {
+    const canvas = document.getElementById("canvas");
+    const imagePreview = document.getElementById("imagePreview");
+    const processedImage = document.getElementById("processedImage");
+
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+
+    img.onload = function () {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      // Use fxCanvas to process the image
+      texture = fxCanvas.texture(canvas);
+      fxCanvas
+        .draw(texture)
+        .hueSaturation(-1, -1) // Grayscale
+        .unsharpMask(20, 2)
+        .brightnessContrast(0.2, 0.9) // Adjust brightness and contrast
+        .update();
+
+      // Draw the processed image onto the canvas
+      ctx.drawImage(fxCanvas, 0, 0);
+
+      // Convert canvas to data URL and set it as the source of processedImage
+      processedImage.src = canvas.toDataURL();
+      processedImage.style.display = "block";
+    };
+
+    img.src = imagePreview.src;
+  };
 
   useEffect(() => {
     const fileInput = document.getElementById("fileInput");
     const imagePreview = document.getElementById("imagePreview");
     const processedImage = document.getElementById("processedImage");
-    const canvas = document.getElementById("canvas");
+
     const button = document.getElementById("button");
+    const capturePhoto = document.getElementById("capturePhoto");
 
     const recognizeText = async () => {
       const worker = await createWorker();
@@ -30,35 +85,6 @@ function App() {
       console.log(ret.data.text);
       setText(ret.data.text);
       await worker.terminate();
-    };
-
-    const preprocess = () => {
-      const ctx = canvas.getContext("2d");
-      const img = new Image();
-
-      img.onload = function () {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-
-        // Use fxCanvas to process the image
-        texture = fxCanvas.texture(canvas);
-        fxCanvas
-          .draw(texture)
-          .hueSaturation(-1, -1) // Grayscale
-          .unsharpMask(20, 2)
-          .brightnessContrast(0.2, 0.9) // Adjust brightness and contrast
-          .update();
-
-        // Draw the processed image onto the canvas
-        ctx.drawImage(fxCanvas, 0, 0);
-
-        // Convert canvas to data URL and set it as the source of processedImage
-        processedImage.src = canvas.toDataURL();
-        processedImage.style.display = "block";
-      };
-
-      img.src = imagePreview.src;
     };
 
     fileInput.addEventListener("change", function (event) {
@@ -75,6 +101,13 @@ function App() {
       recognizeText();
       imagePreview.style.display = "block";
     });
+
+    // capturePhoto.addEventListener("click", () => {
+    //   imagePreview.src = screenshot;
+    //   imagePreview.style.display = "block";
+    //   console.log("Here");
+    //   preprocess();
+    // });
 
     $("#brightness, #contrast").on("change", function () {
       var brightness = $("#brightness").val() / 100;
@@ -123,8 +156,27 @@ function App() {
           </ul>
         </div>
       </div>
-      <div className="mt-8 w-full flex justify-center">
+      <div className="sm:mt-8 w-full flex justify-center">
         <div className="container w-full flex flex-col gap-y-4">
+          {/* <WebcamCapture /> */}
+          {cameraEnabled && (
+            <div className="w-full flex justify-center">
+              <div className="w-full flex flex-col items-center gap-y-2 max-w-4xl">
+                <Camera
+                  ref={camera}
+                  aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
+                />
+                <button onClick={capture} className="btn btn-circle">
+                  <FaCamera />
+                </button>
+              </div>
+            </div>
+          )}
+          {!cameraEnabled && (
+            <button onClick={() => setCameraEnabled(true)}>
+              Take Another Picture
+            </button>
+          )}
           <input type="file" id="fileInput" accept="image/*" />
           <div className="flex gap-x-4">
             <img
