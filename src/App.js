@@ -277,7 +277,7 @@ function App() {
           </div>
           <div
             id="step3"
-            className={`container w-full flex flex-col items-center ${
+            className={`pt-4 sm:pt-0 container w-full flex flex-col items-center ${
               step != 3 && "hidden"
             }`}
           >
