@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
-import Spinner from "react-bootstrap/Spinner";
 import p5 from "p5";
 
 import { Camera } from "react-camera-pro";
@@ -16,7 +15,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
-  let sketchWidth = window.innerWidth * 0.75;
+  let sketchWidth = window.outerWidth * 0.75;
   if (sketchWidth > 768) sketchWidth = 768;
   if (sketchWidth < 344) sketchWidth = 344;
   const [width, setWidth] = useState(sketchWidth);
@@ -193,7 +192,7 @@ function App() {
   //   }
   // }, [responseData]);
 
-  const phoneRatio = window.innerWidth / (window.innerHeight - 64);
+  const phoneRatio = window.outerWidth / (window.outerHeight - 64);
 
   return (
     <div>
@@ -214,7 +213,7 @@ function App() {
               <Camera
                 ref={camera}
                 facingMode="environment"
-                aspectRatio={window.innerWidth > 768 ? 16 / 9 : phoneRatio}
+                aspectRatio={window.outerWidth > 768 ? 16 / 9 : phoneRatio}
               />
               <div className="absolute bottom-0 w-full flex justify-center">
                 <button
@@ -277,7 +276,7 @@ function App() {
           </div>
           <div
             id="step3"
-            className={`container w-full flex flex-col items-center ${
+            className={`pt-4 sm:pt-0 container w-full flex flex-col items-center ${
               step != 3 && "hidden"
             }`}
           >
