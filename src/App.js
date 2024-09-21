@@ -174,8 +174,10 @@ function App() {
   //   }
   // }, [responseData]);
 
+  const phoneRatio = window.innerWidth / (window.innerHeight - 64);
+
   return (
-    <div className="pb-8">
+    <div className="">
       <div className="navbar bg-blue-950 text-white">
         <div className="flex-1">
           <a className="btn btn-ghost text-xl">DISLEXICLEAR</a>
@@ -185,28 +187,25 @@ function App() {
         <div className="container">
           <div
             id="step1"
-            className={`w-full flex flex-col items-center gap-y-4 ${
+            className={`static sm:relative w-full flex flex-col items-center gap-y-4 ${
               !cameraEnabled && "hidden"
             }`}
           >
-            {cameraEnabled && (
-              <div className="w-full flex flex-col items-center max-w-4xl relative">
-                <Camera
-                  ref={camera}
-                  facingMode="environment"
-                  aspectRatio={window.innerWidth > 640 ? 16 / 9 : 2 / 3}
-                />
-                <div className="absolute bottom-0 w-full flex justify-center">
-                  <button
-                    onClick={capture}
-                    className="btn btn-circle btn-lg border-none bg-white mb-1"
-                  >
-                    {/* <FaCamera /> */}
-                    <GiCircle className="size-full text-black" />
-                  </button>
-                </div>
+            <div className="w-full flex flex-col items-center max-w-4xl relative">
+              <Camera
+                ref={camera}
+                facingMode="environment"
+                aspectRatio={window.innerWidth > 640 ? 16 / 9 : phoneRatio}
+              />
+              <div className="absolute bottom-0 w-full flex justify-center">
+                <button
+                  onClick={capture}
+                  className="btn btn-circle btn-lg border-none bg-white mb-1"
+                >
+                  <GiCircle className="size-full text-black" />
+                </button>
               </div>
-            )}
+            </div>
             <div className="hidden sm:flex gap-x-4">
               <label className="label">Or Upload Image</label>
               <input
@@ -247,7 +246,7 @@ function App() {
               )}
               {!loading && <div>{text}</div>}
             </div>
-            <div className="w-full flex justify-center">
+            <div className="w-full flex justify-center mb-8">
               {responseData && <P5Wrapper />}
             </div>
           </div>
