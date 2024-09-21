@@ -54,7 +54,7 @@ export const sketch = (datavals, imgval, width) => (p) => {
     }
 
     //buffer.background(255, 253, 208, 180)
-    blurBuffer.filter(p.BLUR, 10, false);
+    blurBuffer.filter(p.BLUR, 5, false);
 
     buffer.image(blurBuffer, 0, 0)
 
