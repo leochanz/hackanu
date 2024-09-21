@@ -9,7 +9,7 @@ import { GiCircle } from "react-icons/gi";
 import { sketch } from "./utils/Sketch.js";
 
 function App() {
-  const skipConfirmation = false;
+  const skipConfirmation = true;
 
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
