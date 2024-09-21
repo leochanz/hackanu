@@ -1,7 +1,7 @@
 import OpenDyslexic3 from "./OpenDyslexic-Regular.otf";
 
 export const sketch = (datavals, imgval, width) => (p) => {
-  let buffer, blurBuffer;
+  let buffer;
   let img = imgval;
   let data = datavals;
   let zoom = 1;
@@ -26,36 +26,28 @@ export const sketch = (datavals, imgval, width) => (p) => {
     p.createCanvas(imageToAnnotate.width, imageToAnnotate.height);
     chosenCentre = [imageToAnnotate.width / 2, imageToAnnotate.height / 2];
     buffer = p.createGraphics(imageToAnnotate.width, imageToAnnotate.height);
-    blurBuffer = p.createGraphics(imageToAnnotate.width, imageToAnnotate.height);
-    blurBuffer.noStroke();
     buffer.noStroke()
     buffer.image(imageToAnnotate, 0, 0);
     buffer.textFont(dyslexiaFont);
-    blurBuffer.textFont(dyslexiaFont);
     buffer.textAlign(p.CENTER, p.CENTER);
-    blurBuffer.textAlign(p.CENTER, p.CENTER);
     p.imageMode(p.CENTER);
-    blurBuffer.imageMode(p.CENTER)
     buffer.rectMode(p.CENTER);
-    blurBuffer.rectMode(p.CENTER);
 
     let parsedLines = parseLines(data);
 
-    blurBuffer.fill("#FFFDD0");
+    buffer.fill("#FFFDD0");
     for (let line of parsedLines) {
-      blurBuffer.push();
-      blurBuffer.textSize(
+      buffer.push();
+      buffer.textSize(
         findBestFontSize(line["text"], line["width"], line["height"])
       );
       let big = boundsFromText(line)
-      blurBuffer.rect(big["cx"], big["cy"], big["width"], big["height"], big['height']/10);
-      blurBuffer.pop();
+      buffer.rect(big["cx"], big["cy"], big["width"], big["height"], big['height']/10);
+      buffer.pop();
     }
 
     //buffer.background(255, 253, 208, 180)
-    blurBuffer.filter(p.BLUR, 5);
-
-    buffer.image(blurBuffer, 0, 0)
+    buffer.filter(p.BLUR, 5);
 
     buffer.fill("#00008B");
     for (let line of parsedLines) {
@@ -230,8 +222,8 @@ function boundsFromText(box){
   let c = boxCentre(box)
   let cx = c["x"]
   let cy = c["y"]
-  let w = Math.max(box["width"], blurBuffer.textWidth(box["text"])*fontXScale)
-  let h = Math.max(box["height"], blurBuffer.textAscent() + blurBuffer.textDescent())
+  let w = Math.max(box["width"], buffer.textWidth(box["text"])*fontXScale)
+  let h = Math.max(box["height"], buffer.textAscent() + buffer.textDescent())
 
   let bx = cx - w/2
   let by = cy - h/2
@@ -421,4 +413,91 @@ export const sketch = (data, img, width) => (p) => {
         return processed;
     }
 };
+
+
+????????
+
+  let buffer, blurBuffer;
+  let img = imgval;
+  let data = datavals;
+  let zoom = 1;
+  let chosenCentre = [0, 0];
+  let imageToAnnotate, dyslexiaFont;
+  let SCALEFACTOR;
+  const zoomLevel = 2
+  const fontXScale = 1.2
+
+  p.preload = () => {
+    imageToAnnotate = p.loadImage(img);
+    dyslexiaFont = p.loadFont(OpenDyslexic3);
+  };
+
+  p.setup = () => {
+    if (data) {
+	  SCALEFACTOR = width/imageToAnnotate.width;
+    imageToAnnotate.resize(
+      imageToAnnotate.width * SCALEFACTOR,
+      imageToAnnotate.height * SCALEFACTOR
+    );
+    p.createCanvas(imageToAnnotate.width, imageToAnnotate.height);
+    chosenCentre = [imageToAnnotate.width / 2, imageToAnnotate.height / 2];
+    buffer = p.createGraphics(imageToAnnotate.width, imageToAnnotate.height);
+    blurBuffer = p.createGraphics(imageToAnnotate.width, imageToAnnotate.height);
+    blurBuffer.noStroke();
+    buffer.noStroke()
+    buffer.image(imageToAnnotate, 0, 0);
+    buffer.textFont(dyslexiaFont);
+    blurBuffer.textFont(dyslexiaFont);
+    buffer.textAlign(p.CENTER, p.CENTER);
+    blurBuffer.textAlign(p.CENTER, p.CENTER);
+    p.imageMode(p.CENTER);
+    blurBuffer.imageMode(p.CENTER)
+    buffer.rectMode(p.CENTER);
+    blurBuffer.rectMode(p.CENTER);
+
+    let parsedLines = parseLines(data);
+
+    blurBuffer.fill("#FFFDD0");
+    for (let line of parsedLines) {
+      blurBuffer.push();
+      blurBuffer.textSize(
+        findBestFontSize(line["text"], line["width"], line["height"])
+      );
+      let big = boundsFromText(line)
+      blurBuffer.rect(big["cx"], big["cy"], big["width"], big["height"], big['height']/10);
+      blurBuffer.pop();
+    }
+
+    //buffer.background(255, 253, 208, 180)
+    blurBuffer.filter(p.BLUR, 5);
+
+    buffer.image(blurBuffer, 0, 0)
+
+    buffer.fill("#00008B");
+    for (let line of parsedLines) {
+      buffer.push();
+      let textPos = boxCentre(line);
+      buffer.textSize(
+        findBestFontSize(line["text"], line["width"], line["height"])
+      );
+      buffer.text(line["text"]+" ", textPos.x, textPos.y);
+      buffer.pop();
+      }
+    }
+  };
+
+  p.draw = () => {
+    if (data) {
+      p.image(
+        buffer,
+        chosenCentre[0],
+        chosenCentre[1],
+        buffer.width * zoom,
+        buffer.height * zoom
+    );
+    }
+  };
+
+
+
 */
