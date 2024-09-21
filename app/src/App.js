@@ -9,6 +9,11 @@ function App() {
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
+        
+        <div class="btn" id="select-file-button">
+          <a href="#"><span>Select File!</span></a>
+        </div>
+        <input type="file" id="file-input" ></input>
         <a
           className="App-link"
           href="https://reactjs.org"
