@@ -14,7 +14,7 @@ function App() {
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
-  const [width, setWidth] = useState(window.innerWidth * 0.75);
+  const [width, setWidth] = useState(window.innerWidth * 0.75 > 344 ? window.innerWidth * 0.75  : 344);
   const [step, setStep] = useState(1);
 
   const camera = useRef(null);
@@ -260,16 +260,16 @@ function App() {
           </div>
           <div
             id="step3"
-            className={`container pt-4 w-full flex flex-col items-center gap-y-4 ${
+            className={`container pt-4 w-full flex flex-col items-center ${
               step != 3 && "hidden"
             }`}
           >
-            <div className="w-full flex justify-center mb-8">
+            <div className="w-full flex justify-center mb-4">
               {responseData && <P5Wrapper />}
             </div>
-            <div className="flex gap-x-4">
+            <div>
               <button
-                className="btn w-48"
+                className="btn w-48 mb-8"
                 onClick={() => {
                   setStep(1);
                   setResponseData(null);
