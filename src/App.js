@@ -177,17 +177,17 @@ function App() {
   const phoneRatio = window.innerWidth / (window.innerHeight - 64);
 
   return (
-    <div className="fixed sm:relative w-full">
-      <div className="navbar bg-blue-950 text-white">
+    <div>
+      <div className="fixed top-0 sm:relative navbar bg-blue-950 text-white">
         <div className="flex-1">
           <a className="btn btn-ghost text-xl">DYSLEXICLEAR</a>
         </div>
       </div>
-      <div className="sm:mt-8 w-full flex justify-center">
+      <div className="mt-16 w-full flex justify-center">
         <div className="container">
           <div
             id="step1"
-            className={`static sm:relative w-full flex flex-col items-center gap-y-4 ${
+            className={`fixed sm:relative w-full flex flex-col items-center gap-y-4 ${
               !cameraEnabled && "hidden"
             }`}
           >
@@ -218,14 +218,14 @@ function App() {
           </div>
           <div
             id="step2"
-            className={`container w-full flex flex-col items-center gap-y-4 ${
+            className={`container pt-4 w-full flex flex-col items-center gap-y-4 ${
               cameraEnabled && "hidden"
             }`}
           >
             <img
               id="imagePreview"
               alt="Selected Image"
-              className="w-full max-w-2xl hidden"
+              className="w-3/4 max-w-2xl hidden"
             />
             <div className="flex gap-x-4">
               <button

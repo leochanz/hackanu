@@ -1,14 +1,12 @@
-Project Name (WIP): _DyslexiClear_
+Executive Summary: _DyslexiClear_ aims to empower individuals with dyslexia by using AI to transform everyday text into a more accessible format, thereby reducing the mental health burden associated with reading difficulties and enhancing opportunities for educational and professional success. 
 
-Executive Summary: Our application aims to revolutionise reading accessibility for people with dyslexia. 
-
-Pitch: Although dyslexic-friendly fonts are sometimes availiable in hard copy materials, this isn't practical or viable for everyday use. Our web application leverages artificial intelligence and computer vision to convert any kind of text in the real world into an easily readable format in real time, allowing dyslexics to be able to read quickly and easily in any situation.
-
-Key Features: 
-- Real-time AI-powered text reading of images using Optical Character Recognition with Tesseract Engine
-- Adaptive dyslexic-friendly font conversion to OpenDyslexic typeface, a font designed for dyslexics
-- Cross-platform compatibility for use on multiple kinds of devices
-
+Technology Stack:
+- Real-time AI-powered reading of images using Optical Character Recognition with Cloud Vision API
+- Adaptive dyslexic-friendly font conversion to OpenDyslexic typeface, a font designed for dyslexic readers
+  
+Features:
+- Cross-platform compatibility for use on any device
+- Customizable background/text colour combinations to suit the individual user
 
 
 
