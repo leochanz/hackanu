@@ -15,7 +15,18 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
-  let sketchWidth = window.outerWidth * 0.75;
+  // let sketchWidth = window.outerWidth * 0.75;
+  let sketchWidth;
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+    // iOS device
+    sketchWidth = window.innerWidth * 0.75;
+  } else if (/android/i.test(navigator.userAgent)) {
+    // Android device
+    sketchWidth = window.outerWidth * 0.75;
+  } else {
+    // Default case for other devices
+    sketchWidth = window.outerWidth * 0.75;
+  }
   if (sketchWidth > 768) sketchWidth = 768;
   if (sketchWidth < 344) sketchWidth = 344;
   const [width, setWidth] = useState(sketchWidth);
@@ -192,7 +203,18 @@ function App() {
   //   }
   // }, [responseData]);
 
-  const phoneRatio = window.outerWidth / (window.outerHeight - 64);
+  let phoneRatio;
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+    // iOS device
+    phoneRatio = window.innerWidth / (window.innerHeight - 64);
+  } else if (/android/i.test(navigator.userAgent)) {
+    // Android device
+    phoneRatio = window.outerWidth / (window.outerHeight - 64);
+  } else {
+    // Default case for other devices
+    phoneRatio = window.outerWidth / (window.outerHeight - 64);
+  }
+
 
   return (
     <div>
@@ -213,7 +235,7 @@ function App() {
               <Camera
                 ref={camera}
                 facingMode="environment"
-                aspectRatio={window.outerWidth > 768 ? 16 / 9 : phoneRatio}
+                aspectRatio={window.innerWidth > 640 ? 16 / 9 : phoneRatio}
               />
               <div className="absolute bottom-0 w-full flex justify-center">
                 <button
