@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/hackanu/static/css/main.7b0e6e11.css",
-    "main.js": "/hackanu/static/js/main.7a7ecee6.js",
+    "main.css": "/hackanu/static/css/main.6d6e5d8d.css",
+    "main.js": "/hackanu/static/js/main.be8a187f.js",
     "static/js/453.a6a97343.chunk.js": "/hackanu/static/js/453.a6a97343.chunk.js",
     "static/media/OpenDyslexic-Regular.otf": "/hackanu/static/media/OpenDyslexic-Regular.1455ef8fec0fedff22cc.otf",
     "index.html": "/hackanu/index.html",
-    "main.7b0e6e11.css.map": "/hackanu/static/css/main.7b0e6e11.css.map",
-    "main.7a7ecee6.js.map": "/hackanu/static/js/main.7a7ecee6.js.map",
+    "main.6d6e5d8d.css.map": "/hackanu/static/css/main.6d6e5d8d.css.map",
+    "main.be8a187f.js.map": "/hackanu/static/js/main.be8a187f.js.map",
     "453.a6a97343.chunk.js.map": "/hackanu/static/js/453.a6a97343.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.7b0e6e11.css",
-    "static/js/main.7a7ecee6.js"
+    "static/css/main.6d6e5d8d.css",
+    "static/js/main.be8a187f.js"
   ]
 }
