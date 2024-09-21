@@ -9,9 +9,9 @@ import { GiCircle } from "react-icons/gi";
 import { sketch } from "./utils/Sketch.js";
 
 function App() {
-  const [text, setText] = useState("");
+  const skipConfirmation = true;
+
   const [loading, setLoading] = useState(false);
-  const [cameraEnabled, setCameraEnabled] = useState(true);
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
   let sketchWidth = window.innerWidth * 0.75;
@@ -48,10 +48,14 @@ function App() {
     setImage(imageSrc);
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
-    await recognizeText();
-    if (responseData != "No text detected") setStep(3);
-    console.log("Here");
-    // preprocess();
+
+    if (skipConfirmation) {
+      await recognizeText();
+      if (responseData != "No text detected") setStep(3);
+      console.log("Here");
+    } else {
+      setStep(2);
+    }
   };
 
   const getBase64FromBlobUrl = async (blobUrl) => {
@@ -102,14 +106,13 @@ function App() {
 
       if (data.detections == "No text detected") {
         setResponseData("No text detected");
-        setText("No text detected");
       } else {
         setResponseData(data);
-        setText(data.detections[0].description);
+        console.log(data.detections[0].description);
       }
     } catch (error) {
       console.error("Failed to fetch:", error);
-      setText("Failed to fetch data");
+      console.log("Failed to fetch data");
     } finally {
       setLoading(false);
       console.timeEnd("Start");
@@ -169,6 +172,7 @@ function App() {
     });
 
     button.addEventListener("click", () => {
+      setStep(3);
       recognizeText();
       imagePreview.style.display = "block";
     });
@@ -247,7 +251,6 @@ function App() {
                   onClick={() => {
                     setStep(1);
                     setResponseData(null);
-                    setText("");
                     window.scrollTo({
                       top: 0,
                       behavior: "smooth",
@@ -288,7 +291,6 @@ function App() {
                 onClick={() => {
                   setStep(1);
                   setResponseData(null);
-                  setText("");
                   window.scrollTo({
                     top: 0,
                     behavior: "smooth",
