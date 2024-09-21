@@ -17,12 +17,10 @@ function App() {
   const [cameraEnabled, setCameraEnabled] = useState(true);
 
   const camera = useRef(null);
-  const [image, setImage] = useState(null);
 
   const capture = () => {
     const imagePreview = document.getElementById("imagePreview");
     const imageSrc = camera.current.takePhoto();
-    setImage(imageSrc);
     setCameraEnabled(false);
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
@@ -63,24 +61,68 @@ function App() {
     img.src = imagePreview.src;
   };
 
+  const [data, setData] = useState(null);
+
   useEffect(() => {
     const fileInput = document.getElementById("fileInput");
     const imagePreview = document.getElementById("imagePreview");
-    const processedImage = document.getElementById("processedImage");
+    // const processedImage = document.getElementById("processedImage");
 
     const button = document.getElementById("button");
+    
+    const getBase64FromBlobUrl = async (blobUrl) => {
+      const response = await fetch(blobUrl);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result.split(',')[1]); // Extract base64 part
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    };
+  
+    const getBase64Image = async (imageSrc) => {
+      if (imageSrc.startsWith('data:image')) {
+        return imageSrc.replace('data:', '').replace(/^.+,/, '');
+      } else if (imageSrc.startsWith('blob:')) {
+        return await getBase64FromBlobUrl(imageSrc);
+      }
+      throw new Error('Unsupported image source format');
+    };
 
     const recognizeText = async () => {
-      const worker = await createWorker();
+      const base64Image = await getBase64Image(imagePreview.src);
+      // const worker = await createWorker();
       console.time("Start");
       setLoading(true);
-      const ret = await worker.recognize(imagePreview.src);
-      setLoading(false);
-      // const ret = await worker.recognize(imagePreview.src);
-      console.timeEnd("Start");
-      console.log(ret.data.text);
-      setText(ret.data.text);
-      await worker.terminate();
+      try {
+        const response = await fetch(
+          "https://australia-southeast1-oeege-436306.cloudfunctions.net/analyze-image",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ image: base64Image }),
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(data);
+        setData(data);
+        const descriptions = data.detections.map(detection => detection.description).join(', ');
+        setText(descriptions);
+      } catch (error) {
+        console.error("Failed to fetch:", error);
+        setText("Failed to fetch data");
+      } finally {
+        setLoading(false);
+        console.timeEnd("Start");
+      }
     };
 
     fileInput.addEventListener("change", function (event) {
@@ -163,7 +205,10 @@ function App() {
           )}
           {!cameraEnabled && (
             <div className="w-full flex justify-center">
-              <button className="btn w-48" onClick={() => setCameraEnabled(true)}>
+              <button
+                className="btn w-48"
+                onClick={() => setCameraEnabled(true)}
+              >
                 Take Another Picture
               </button>
             </div>
@@ -202,7 +247,7 @@ function App() {
               defaultValue="90"
             />
           </p> */}
-          <button id="button" className="btn w-48">
+          <button id="button" className="mt-8 btn w-48">
             Recognize Text
           </button>
           <div className="p-4 bg-white text-xs border">
