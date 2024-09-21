@@ -14,7 +14,11 @@ function App() {
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [image, setImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
-  const [width, setWidth] = useState(window.innerWidth * 0.75);
+  let sketchWidth = window.innerWidth * 0.75;
+  if (sketchWidth > 640) sketchWidth = 640;
+  if (sketchWidth < 344) sketchWidth = 344;
+  const [width, setWidth] = useState(sketchWidth);
+  const [step, setStep] = useState(1);
 
   const camera = useRef(null);
 
@@ -22,13 +26,17 @@ function App() {
     const sketchRef = useRef();
 
     useEffect(() => {
-      const p5Instance = new p5(
-        sketch(responseData, image, width),
-        sketchRef.current
-      );
-      return () => {
-        p5Instance.remove();
-      };
+      console.log("responseData:", responseData);
+      if (responseData != "No text detected") {
+        const p5Instance = new p5(
+          sketch(responseData, image, width),
+          sketchRef.current
+        );
+        setStep(3);
+        return () => {
+          p5Instance.remove();
+        };
+      }
     }, []);
 
     return <div ref={sketchRef}></div>;
@@ -38,7 +46,7 @@ function App() {
     const imagePreview = document.getElementById("imagePreview");
     const imageSrc = camera.current.takePhoto();
     setImage(imageSrc);
-    setCameraEnabled(false);
+    setStep(2);
     imagePreview.src = imageSrc;
     imagePreview.style.display = "block";
     console.log("Here");
@@ -128,8 +136,14 @@ function App() {
         }
         const data = await response.json();
         console.log(data);
-        setResponseData(data);
-        setText(data.detections[0].description);
+
+        if (data.detections == "No text detected") {
+          setResponseData("No text detected");
+          setText("No text detected");
+        } else {
+          setResponseData(data);
+          setText(data.detections[0].description);
+        }
       } catch (error) {
         console.error("Failed to fetch:", error);
         setText("Failed to fetch data");
@@ -145,7 +159,7 @@ function App() {
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.style.display = "block";
         setImage(imagePreview.src);
-        setCameraEnabled(false);
+        setStep(2);
         console.log("Here");
         event.target.value = null;
       }
@@ -160,10 +174,6 @@ function App() {
       fileInput.removeEventListener("change", () => {});
     };
   }, []);
-
-  useEffect(() => {
-    setResponseData(null);
-  }, [cameraEnabled]);
 
   // const p5WrapperRef = useRef(null);
   // useEffect(() => {
@@ -188,10 +198,10 @@ function App() {
           <div
             id="step1"
             className={`fixed sm:relative w-full flex flex-col items-center gap-y-4 ${
-              !cameraEnabled && "hidden"
+              step != 1 && "hidden"
             }`}
           >
-            <div className="w-full flex flex-col items-center max-w-4xl relative">
+            <div className="w-full sm:w-3/4 flex flex-col items-center max-w-[640px] relative">
               <Camera
                 ref={camera}
                 facingMode="environment"
@@ -218,19 +228,27 @@ function App() {
           </div>
           <div
             id="step2"
-            className={`container pt-4 w-full flex flex-col items-center gap-y-4 ${
-              cameraEnabled && "hidden"
+            className={`pt-4 w-full flex flex-col items-center gap-y-4 ${
+              step != 2 && "hidden"
             }`}
           >
             <img
               id="imagePreview"
               alt="Selected Image"
-              className="w-3/4 max-w-2xl hidden"
+              className="w-3/4 min-w-[344px] max-w-[640px] hidden"
             />
             <div className="flex gap-x-4">
               <button
                 className="btn w-48"
-                onClick={() => setCameraEnabled(true)}
+                onClick={() => {
+                  setStep(1);
+                  setResponseData(null);
+                  setText("");
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
               >
                 Take Another Picture
               </button>
@@ -238,16 +256,35 @@ function App() {
                 Recognize Text
               </button>
             </div>
-            <div className="w-full max-w-2xl p-4 bg-white text-xs border">
-              {loading && (
-                <Spinner animation="border" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-              )}
-              {!loading && <div>{text}</div>}
+            <div className="w-full ml-4 mr-4 max-w-2xl p-4 bg-white text-xs border">
+              {loading && <span class="loading loading-dots loading-xs"></span>}
+              {text == "No text detected" && <div>{text}</div>}
             </div>
-            <div className="w-full flex justify-center mb-8">
+          </div>
+          <div
+            id="step3"
+            className={`container pt-4 w-full flex flex-col items-center ${
+              step != 3 && "hidden"
+            }`}
+          >
+            <div className="w-full flex justify-center mb-4">
               {responseData && <P5Wrapper />}
+            </div>
+            <div>
+              <button
+                className="btn w-48 mb-8"
+                onClick={() => {
+                  setStep(1);
+                  setResponseData(null);
+                  setText("");
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+              >
+                Take Another Picture
+              </button>
             </div>
           </div>
         </div>
