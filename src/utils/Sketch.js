@@ -3,13 +3,12 @@ import OpenDyslexic3 from "./OpenDyslexic-Regular.otf";
 export const sketch = (data, img, width) => (p) => {
   let buffer;
   let zoom = 1;
-  let chosenCentre;
+  let chosenCentre = [0, 0];
   let imageToAnnotate, dyslexiaFont;
   let SCALEFACTOR ;
   p.preload = () => {
     imageToAnnotate = p.loadImage(img);
       dyslexiaFont = p.loadFont(OpenDyslexic3);
-    // dyslexiaFont = p.loadFont("Arial");
   };
 
   p.setup = () => {
@@ -20,6 +19,7 @@ export const sketch = (data, img, width) => (p) => {
     );
     p.createCanvas(imageToAnnotate.width, imageToAnnotate.height);
     chosenCentre = [imageToAnnotate.width / 2, imageToAnnotate.height / 2];
+    console.log(chosenCentre)
     buffer = p.createGraphics(imageToAnnotate.width, imageToAnnotate.height);
     buffer.noStroke();
     buffer.image(imageToAnnotate, 0, 0);
@@ -65,18 +65,20 @@ export const sketch = (data, img, width) => (p) => {
   };
 
   p.mouseClicked = () => {
-    console.log(chosenCentre);
-    if (zoom === 1) {
-      zoom = 3;
-      let cx = chosenCentre[0];
-      let cy = chosenCentre[1];
-      chosenCentre = [
-        (zoom + 1) * cx - zoom * p.mouseX,
-        (zoom + 1) * cy - zoom * p.mouseY,
-      ];
-    } else {
-      zoom = 1;
-      chosenCentre = [buffer.width / 2, buffer.height / 2];
+    if (buffer && chosenCentre){
+      if (zoom === 1) {
+        zoom = 3;
+        let cx = chosenCentre[0];
+        let cy = chosenCentre[1];
+        chosenCentre = [
+          (zoom + 1) * cx - zoom * p.mouseX,
+          (zoom + 1) * cy - zoom * p.mouseY,
+        ];
+      } else {
+        zoom = 1;
+        console.log(buffer.width)
+        chosenCentre = [buffer.width / 2, buffer.height / 2];
+      }
     }
   };
 
