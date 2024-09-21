@@ -131,7 +131,7 @@ function App() {
 
   return (
     <div className="">
-      <div className="navbar bg-blue-950 text-white">
+      {/* <div className="navbar bg-blue-950 text-white">
         <div className="flex-1">
           <a className="btn btn-ghost text-xl">DISLEXICLEAR</a>
         </div>
@@ -155,7 +155,7 @@ function App() {
             </li>
           </ul>
         </div>
-      </div>
+      </div> */}
       <div className="sm:mt-8 w-full flex justify-center">
         <div className="container w-full flex flex-col gap-y-4">
           {/* <WebcamCapture /> */}
