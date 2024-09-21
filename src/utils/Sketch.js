@@ -6,9 +6,11 @@ export const sketch = (data, img, width) => (p) => {
   let chosenCentre = [0, 0];
   let imageToAnnotate, dyslexiaFont;
   let SCALEFACTOR ;
+  let minSize;
+
   p.preload = () => {
     imageToAnnotate = p.loadImage(img);
-      dyslexiaFont = p.loadFont(OpenDyslexic3);
+    dyslexiaFont = p.loadFont(OpenDyslexic3);
   };
 
   p.setup = () => {
@@ -17,6 +19,7 @@ export const sketch = (data, img, width) => (p) => {
       imageToAnnotate.width * SCALEFACTOR,
       imageToAnnotate.height * SCALEFACTOR
     );
+    minSize = Math.min(imageToAnnotate.width, imageToAnnotate.height) * 0.05
     p.createCanvas(imageToAnnotate.width, imageToAnnotate.height);
     chosenCentre = [imageToAnnotate.width / 2, imageToAnnotate.height / 2];
     console.log(chosenCentre)
@@ -40,7 +43,7 @@ export const sketch = (data, img, width) => (p) => {
       buffer.pop();
     }
 
-    buffer.filter(p.BLUR, 10);
+    //buffer.filter(p.BLUR, 10);
 
     buffer.fill("#00008B");
     for (let line of parsedLines) {
@@ -152,8 +155,8 @@ export const sketch = (data, img, width) => (p) => {
       processed.push({
         bbx: boxLeft*SCALEFACTOR,
         bby: boxTop*SCALEFACTOR,
-        width: boxWidth*SCALEFACTOR,
-        height: boxHeight*SCALEFACTOR,
+        width: Math.max(boxWidth*SCALEFACTOR, minSize),
+        height: Math.max(boxHeight*SCALEFACTOR, minSize),
         text: box["text"],
       });
     }
